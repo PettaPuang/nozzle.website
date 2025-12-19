@@ -1,0 +1,909 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  // Optimasi untuk Vercel: gunakan binary yang lebih kecil
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // Connection pooling untuk Vercel (jika menggunakan connection pooler)
+  // Vercel Postgres otomatis menggunakan connection pooling
+  // Jika menggunakan Prisma Accelerate, gunakan prisma+postgres:// protocol
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+// Standardized status enum for ACTIVE/INACTIVE states
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum Shift {
+  MORNING
+  AFTERNOON
+  NIGHT
+}
+
+enum OperatorShiftStatus {
+  PENDING
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+enum ReadingType {
+  OPEN
+  CLOSE
+}
+
+// Standardized approval status enum for all approval workflows
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Payment Account (level 1: CASH atau BANK)
+enum PaymentAccount {
+  CASH
+  BANK
+}
+
+// Payment Method (level 2: breakdown detail)
+enum PaymentMethod {
+  QRIS
+  TRANSFER
+  DEBIT_CARD
+  CREDIT_CARD
+  MY_PERTAMINA // My Pertamina (bank payment method)
+  COUPON // Accounting entry untuk tip (contra entry, nilai NEGATIF)
+  ETC // Bisa CASH atau BANK
+}
+
+enum COACategory {
+  ASSET // Aset
+  LIABILITY // Kewajiban
+  EQUITY // Ekuitas/Modal
+  REVENUE // Pendapatan
+  EXPENSE // Beban
+  COGS // Cost of Goods Sold / HPP (Harga Pokok Penjualan)
+}
+
+enum TransactionType {
+  // Operational (Auto-generated, Auto-approved)
+  UNLOAD // Susut perjalanan saat unload di-approve
+  TANK_READING // Loss/profit dari tank reading
+  REVENUE // Pendapatan dari deposit operator
+  COGS // HPP dari deposit operator
+  DEPOSIT // Payment saat deposit di-approve finance
+  ADJUSTMENT // Perubahan harga tebus atau adjustment manual
+
+  // Manual (Created by Finance, Perlu Approval Manager)
+  PURCHASE_BBM // Pembelian BBM (dicreate finance, perlu approval manager)
+  CASH // Pendapatan/pengeluaran/transfer kas (finance, perlu approval manager)
+}
+
+enum Role {
+  DEVELOPER // Developer sistem
+  ADMINISTRATOR // Super admin dengan akses penuh ke sistem
+  OWNER // Pemilik SPBU, akses penuh manajemen
+  OWNER_GROUP // Keluarga owner, view only + bisa create purchase transaction
+  MANAGER // Manager SPBU, approval workflow
+  OPERATOR // Operator nozzle, input shift dan reading
+  UNLOADER // Petugas bongkar, input ATG dan unload
+  FINANCE // Admin keuangan, verifikasi deposit
+  ACCOUNTING // Akuntan, manage COA dan transaksi
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+model User {
+  id        String  @id @default(cuid())
+  username  String  @unique
+  email     String  @unique
+  password  String
+  role      Role // Role langsung enum, tidak perlu relasi
+  ownerId   String? // Untuk ADMINISTRATOR: owner yang dia manage
+  profileId String? @unique
+
+  // Relations
+  profile        Profile?         @relation(fields: [profileId], references: [id])
+  owner          User?            @relation("AdministratorOwner", fields: [ownerId], references: [id], onDelete: Cascade) // ADMINISTRATOR -> OWNER
+  administrators User[]           @relation("AdministratorOwner") // OWNER -> ADMINISTRATOR[]
+  gasStations    UserGasStation[]
+
+  // Operator relations
+  operatorShifts OperatorShift[] @relation("OperatorShifts")
+
+  // Admin Finance relations
+  receivedDeposits     Deposit[]     @relation("AdminFinanceDeposits")
+  approvedTransactions Transaction[] @relation("TransactionApprover") // Transaction baru
+
+  // Loader relations
+  tankReadingsCreated TankReading[] @relation("LoaderTankReadings")
+  unloadsCreated      Unload[]      @relation("UnloaderUnloads")
+
+  // Manager/Approver relations
+  tankReadingsApproved TankReading[] @relation("ApproverTankReadings")
+  unloadsApproved      Unload[]      @relation("ApproverUnloads")
+
+  // Owner relations
+  ownedGasStations GasStation[] @relation("OwnerGasStations")
+
+  // Audit trail relations
+  createdUsers               User[]                @relation("UserCreatedBy")
+  createdProfiles            Profile[]             @relation("ProfileCreatedBy")
+  createdUserGasStations     UserGasStation[]      @relation("UserGasStationCreatedBy")
+  createdGasStations         GasStation[]          @relation("GasStationCreatedBy")
+  createdProducts            Product[]             @relation("ProductCreatedBy")
+  createdProductPriceHistory ProductPriceHistory[] @relation("ProductPriceHistoryCreatedBy")
+  createdTanks               Tank[]                @relation("TankCreatedBy")
+  createdStations            Station[]             @relation("StationCreatedBy")
+  createdTankStations        TankStation[]         @relation("TankStationCreatedBy")
+  createdNozzles             Nozzle[]              @relation("NozzleCreatedBy")
+  createdOperatorShifts      OperatorShift[]       @relation("OperatorShiftCreatedBy")
+  createdNozzleReadings      NozzleReading[]       @relation("NozzleReadingCreatedBy")
+  createdTankReadings        TankReading[]         @relation("TankReadingCreatedBy")
+  createdDeposits            Deposit[]             @relation("DepositCreatedBy")
+  createdDepositDetails      DepositDetail[]       @relation("DepositDetailCreatedBy")
+  createdUnloads             Unload[]              @relation("UnloadCreatedBy")
+  createdTransactions        Transaction[]         @relation("TransactionCreatedBy") // Transaction baru
+  notifications              Notification[]        @relation("UserNotifications")
+  notificationsFrom          Notification[]        @relation("NotificationFromUser")
+  createdJournalEntries      JournalEntry[]        @relation("JournalEntryCreatedBy")
+  createdCOAs                COA[]                 @relation("COACreatedBy")
+  updatedUsers               User[]                @relation("UserUpdatedBy")
+  updatedProfiles            Profile[]             @relation("ProfileUpdatedBy")
+  updatedUserGasStations     UserGasStation[]      @relation("UserGasStationUpdatedBy")
+  updatedGasStations         GasStation[]          @relation("GasStationUpdatedBy")
+  updatedProducts            Product[]             @relation("ProductUpdatedBy")
+  updatedTanks               Tank[]                @relation("TankUpdatedBy")
+  updatedStations            Station[]             @relation("StationUpdatedBy")
+  updatedTankStations        TankStation[]         @relation("TankStationUpdatedBy")
+  updatedNozzles             Nozzle[]              @relation("NozzleUpdatedBy")
+  deletedNozzles             Nozzle[]              @relation("NozzleDeletedBy")
+  updatedOperatorShifts      OperatorShift[]       @relation("OperatorShiftUpdatedBy")
+  updatedNozzleReadings      NozzleReading[]       @relation("NozzleReadingUpdatedBy")
+  updatedTankReadings        TankReading[]         @relation("TankReadingUpdatedBy")
+  updatedDeposits            Deposit[]             @relation("DepositUpdatedBy")
+  updatedDepositDetails      DepositDetail[]       @relation("DepositDetailUpdatedBy")
+  updatedUnloads             Unload[]              @relation("UnloadUpdatedBy")
+  updatedTransactions        Transaction[]         @relation("TransactionUpdatedBy") // Transaction baru
+  updatedJournalEntries      JournalEntry[]        @relation("JournalEntryUpdatedBy")
+  updatedCOAs                COA[]                 @relation("COAUpdatedBy")
+
+  // Subscription management relations
+  createdSubscriptionPlans   SubscriptionPlan[]   @relation("SubscriptionPlanCreatedBy")
+  updatedSubscriptionPlans   SubscriptionPlan[]   @relation("SubscriptionPlanUpdatedBy")
+  createdPromoCodes          PromoCode[]          @relation("PromoCodeCreatedBy")
+  updatedPromoCodes          PromoCode[]          @relation("PromoCodeUpdatedBy")
+  createdSubscriptionConfigs SubscriptionConfig[] @relation("SubscriptionConfigCreatedBy")
+  updatedSubscriptionConfigs SubscriptionConfig[] @relation("SubscriptionConfigUpdatedBy")
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("UserCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("UserUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([role])
+  @@index([ownerId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Profile {
+  id      String  @id @default(cuid())
+  name    String
+  phone   String?
+  address String?
+  avatar  String?
+
+  // Relations
+  user User?
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("ProfileCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("ProfileUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model UserGasStation {
+  id           String   @id @default(cuid())
+  userId       String
+  gasStationId String
+  assignedAt   DateTime @default(now())
+  status       Status   @default(ACTIVE)
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gasStation GasStation @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("UserGasStationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("UserGasStationUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, gasStationId])
+  @@index([userId])
+  @@index([gasStationId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+// ============================================
+// GAS STATION & INFRASTRUCTURE
+// ============================================
+
+model GasStation {
+  id                 String   @id @default(cuid())
+  name               String
+  address            String
+  latitude           Float?
+  longitude          Float?
+  ownerId            String
+  openTime           String?
+  closeTime          String?
+  status             Status   @default(ACTIVE)
+  managerCanPurchase Boolean  @default(false) // Manager bisa akses accounting
+  financeCanPurchase Boolean  @default(false) // Finance bisa akses accounting
+  hasTitipan         Boolean  @default(false) // Aktifkan fitur titipan product
+  titipanNames       String[] @default([]) // Nama-nama titipan: ["Polres", "Pemkot", dll]
+
+  // Subscription fields
+  subscriptionType      String? // "FREE" | "TRIAL" | "PAID" | null
+  subscriptionStartDate DateTime?
+  subscriptionEndDate   DateTime?
+  isTrial               Boolean   @default(false)
+
+  // Auto payment fields (untuk fase 2 - nullable)
+  paymentGateway        String? // "STRIPE" | "MIDTRANS" | "XENDIT"
+  paymentSubscriptionId String? // Subscription ID dari payment gateway
+  paymentMethodToken    String? // Token payment method
+  isAutoRenew           Boolean @default(false)
+
+  // Relations
+  owner               User                  @relation("OwnerGasStations", fields: [ownerId], references: [id])
+  users               UserGasStation[]
+  tanks               Tank[]
+  stations            Station[]
+  operatorShifts      OperatorShift[]
+  transactions        Transaction[] // Transaction baru (header jurnal)
+  coas                COA[] // Chart of Accounts
+  products            Product[] // Produk per gas station
+  productPriceHistory ProductPriceHistory[] // History perubahan harga product
+  notifications       Notification[]
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("GasStationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("GasStationUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([subscriptionEndDate])
+}
+
+model Product {
+  id            String  @id @default(cuid())
+  gasStationId  String
+  name          String
+  ron           String? // Research Octane Number untuk BBM
+  purchasePrice Int // Harga beli dalam Rupiah (bulat)
+  sellingPrice  Int // Harga jual dalam Rupiah (bulat)
+
+  // Relations
+  gasStation           GasStation            @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+  tanks                Tank[]
+  nozzles              Nozzle[]
+  purchaseTransactions Transaction[] // Purchase transactions untuk product ini
+  priceHistory         ProductPriceHistory[] // History perubahan harga
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("ProductUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([gasStationId, name])
+  @@index([gasStationId])
+  @@index([name])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+// Product Price History - Menyimpan semua perubahan harga product
+model ProductPriceHistory {
+  id           String @id @default(cuid())
+  productId    String
+  gasStationId String
+
+  // Price snapshot
+  oldPurchasePrice Int // Harga beli lama
+  newPurchasePrice Int // Harga beli baru
+  oldSellingPrice  Int? // Harga jual lama (optional)
+  newSellingPrice  Int? // Harga jual baru (optional)
+
+  // Change date
+  changeDate DateTime // Tanggal dan waktu perubahan harga (UTC)
+
+  // Relations
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  gasStation GasStation @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("ProductPriceHistoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+  @@index([gasStationId])
+  @@index([changeDate])
+  @@index([createdById])
+}
+
+model Tank {
+  id           String @id @default(cuid())
+  gasStationId String
+  productId    String
+  capacity     Int // Kapasitas tank dalam liter (bulat)
+  initialStock Int    @default(0) // Stock awal saat tank dibuat dalam liter (bulat)
+  code         String
+  name         String
+
+  // Relations
+  gasStation         GasStation    @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+  product            Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stationConnections TankStation[] // Many-to-Many dengan Station
+  nozzles            Nozzle[] // Direct relation untuk tracking sales
+  tankReadings       TankReading[]
+  unloads            Unload[]
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("TankCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("TankUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([gasStationId, code])
+  @@index([gasStationId])
+  @@index([productId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Station {
+  id           String @id @default(cuid())
+  gasStationId String
+  code         String
+  name         String
+
+  // Relations
+  gasStation      GasStation      @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+  tankConnections TankStation[] // Many-to-Many dengan Tank
+  nozzles         Nozzle[]
+  operatorShifts  OperatorShift[]
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("StationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("StationUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([gasStationId, code])
+  @@index([gasStationId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+// Junction table for Tank-Station Many-to-Many relationship
+model TankStation {
+  id        String @id @default(cuid())
+  tankId    String
+  stationId String
+
+  // Relations
+  tank    Tank    @relation(fields: [tankId], references: [id], onDelete: Cascade)
+  station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("TankStationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("TankStationUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tankId, stationId])
+  @@index([tankId])
+  @@index([stationId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Nozzle {
+  id        String @id @default(cuid())
+  stationId String
+  tankId    String // Direct relation ke Tank untuk tracking sales
+  productId String
+  code      String
+  name      String
+
+  // Relations
+  station        Station         @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  tank           Tank            @relation(fields: [tankId], references: [id], onDelete: Cascade)
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  nozzleReadings NozzleReading[]
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("NozzleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("NozzleUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  // Soft delete
+  deletedAt   DateTime?
+  deletedById String?
+  deletedBy   User?     @relation("NozzleDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  @@unique([stationId, code])
+  @@index([stationId])
+  @@index([tankId])
+  @@index([productId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([deletedAt])
+}
+
+// ============================================
+// OPERATIONAL
+// ============================================
+
+model OperatorShift {
+  id           String              @id @default(cuid())
+  operatorId   String
+  stationId    String
+  gasStationId String
+  shift        Shift
+  date         DateTime            @db.Date
+  startTime    DateTime?
+  endTime      DateTime?
+  status       OperatorShiftStatus @default(PENDING)
+  isVerified   Boolean             @default(false) // Menandai apakah nilai totalisator sudah diverifikasi
+  notes        String?             @db.Text
+
+  // Relations
+  operator       User            @relation("OperatorShifts", fields: [operatorId], references: [id], onDelete: Cascade)
+  station        Station         @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  gasStation     GasStation      @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+  nozzleReadings NozzleReading[]
+  deposit        Deposit?
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("OperatorShiftCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("OperatorShiftUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([operatorId])
+  @@index([stationId])
+  @@index([gasStationId])
+  @@index([date])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model NozzleReading {
+  id               String      @id @default(cuid())
+  operatorShiftId  String
+  nozzleId         String
+  readingType      ReadingType
+  totalizerReading Int // Bacaan meter totalisator (cumulative) dalam liter (bulat)
+  pumpTest         Int         @default(0) // Pump test dalam liter (bulat)
+  priceSnapshot    Int // Snapshot harga dari product.sellingPrice saat reading dalam Rupiah (bulat)
+  imageUrl         String?
+  notes            String?     @db.Text
+
+  // Relations
+  operatorShift OperatorShift @relation(fields: [operatorShiftId], references: [id], onDelete: Cascade)
+  nozzle        Nozzle        @relation(fields: [nozzleId], references: [id], onDelete: Cascade)
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("NozzleReadingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("NozzleReadingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([operatorShiftId])
+  @@index([nozzleId])
+  @@index([readingType])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model TankReading {
+  id             String         @id @default(cuid())
+  tankId         String
+  literValue     Int // Volume dalam liter (bulat)
+  imageUrl       String?
+  notes          String?        @db.Text
+  loaderId       String
+  approverId     String?
+  approvalStatus ApprovalStatus @default(PENDING)
+
+  // Snapshot fields untuk konsistensi data
+  date          DateTime @db.Date // Tanggal reading (UTC) untuk konsistensi filtering
+  stockOpen     Int? // Stock awal yang digunakan untuk perhitungan saat reading dibuat (dalam liter, bulat)
+  stockRealtime Int? // Realtime stock saat reading dibuat (dalam liter, bulat, tidak berubah meskipun data historis berubah)
+  variance      Int? // Variance yang sudah dihitung dan disimpan (dalam liter, bulat, tidak berubah meskipun data historis berubah)
+
+  // Relations
+  tank     Tank  @relation(fields: [tankId], references: [id], onDelete: Cascade)
+  loader   User  @relation("LoaderTankReadings", fields: [loaderId], references: [id])
+  approver User? @relation("ApproverTankReadings", fields: [approverId], references: [id])
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("TankReadingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("TankReadingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([tankId])
+  @@index([loaderId])
+  @@index([approverId])
+  @@index([approvalStatus])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([date])
+}
+
+// ============================================
+// FINANCIAL
+// ============================================
+
+// Chart of Accounts (COA)
+model COA {
+  id           String      @id @default(cuid())
+  gasStationId String
+  code         String? // Nullable untuk future development (hierarki)
+  name         String
+  category     COACategory
+  status       Status      @default(ACTIVE)
+  description  String?
+
+  // Relations
+  gasStation     GasStation     @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+  journalEntries JournalEntry[] // Detail jurnal yang menggunakan COA ini
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("COACreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("COAUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([gasStationId, name]) // Nama akun unik per gas station
+  @@index([gasStationId])
+  @@index([category])
+  @@index([status])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Deposit {
+  id                     String         @id @default(cuid())
+  operatorShiftId        String         @unique
+  adminFinanceId         String?
+  totalAmount            Int // Total jumlah setoran dalam Rupiah (bulat)
+  operatorDeclaredAmount Int // Jumlah yang dideklarasikan operator dalam Rupiah (bulat)
+  adminReceivedAmount    Int? // Jumlah yang diterima admin dalam Rupiah (bulat)
+  status                 ApprovalStatus @default(PENDING)
+  notes                  String?        @db.Text
+
+  // Relations
+  operatorShift  OperatorShift   @relation(fields: [operatorShiftId], references: [id], onDelete: Cascade)
+  adminFinance   User?           @relation("AdminFinanceDeposits", fields: [adminFinanceId], references: [id])
+  depositDetails DepositDetail[]
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("DepositCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("DepositUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([operatorShiftId])
+  @@index([adminFinanceId])
+  @@index([status])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model DepositDetail {
+  id             String         @id @default(cuid())
+  depositId      String
+  paymentAccount PaymentAccount // CASH atau BANK
+  paymentMethod  PaymentMethod? // Optional, untuk breakdown BANK atau COUPON/ETC. COUPON harus NEGATIF (contra entry untuk tip)
+  bankName       String? // Optional: untuk multiple bank accounts (misal: "BCA", "Mandiri")
+  operatorAmount Int // Jumlah operator dalam Rupiah (bulat), bisa negatif untuk COUPON (contra entry tip)
+  adminAmount    Int? // Jumlah admin dalam Rupiah (bulat)
+  notes          String?        @db.Text
+
+  // Relations
+  deposit Deposit @relation(fields: [depositId], references: [id], onDelete: Cascade)
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("DepositDetailCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("DepositDetailUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([depositId])
+  @@index([paymentAccount])
+  @@index([paymentMethod])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+// Transaction baru - Header Transaksi Jurnal (menggantikan Transaction lama)
+model Transaction {
+  id              String   @id @default(cuid())
+  gasStationId    String
+  date            DateTime @db.Date
+  description     String
+  referenceNumber String?
+  notes           String?  @db.Text
+
+  // Transaction Type
+  transactionType TransactionType
+
+  // Approval
+  approvalStatus ApprovalStatus @default(PENDING)
+  approverId     String?
+
+  // Purchase tracking (hanya untuk PURCHASE_BBM)
+  productId       String? // Product ID untuk purchase transaction (link ke Product)
+  purchaseVolume  Int? // Total volume pesanan dalam liter (misal: 16000L)
+  deliveredVolume Int     @default(0) // Total volume yang sudah di-deliver dalam liter
+
+  // Relations
+  gasStation      GasStation     @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+  product         Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  approver        User?          @relation("TransactionApprover", fields: [approverId], references: [id])
+  journalEntries  JournalEntry[] // Detail jurnal (debit/kredit)
+  purchaseUnloads Unload[]       @relation("PurchaseUnloads") // Purchase transactions yang digunakan untuk unload
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("TransactionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("TransactionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([gasStationId])
+  @@index([productId])
+  @@index([date])
+  @@index([approvalStatus])
+  @@index([approverId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([transactionType])
+}
+
+// JournalEntry - Detail Jurnal (Debit/Kredit)
+model JournalEntry {
+  id            String  @id @default(cuid())
+  transactionId String // Link ke Transaction (header)
+  coaId         String // Link ke COA
+  debit         Int     @default(0) // Debit dalam Rupiah (bulat)
+  credit        Int     @default(0) // Credit dalam Rupiah (bulat)
+  description   String?
+
+  // Relations
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  coa         COA         @relation(fields: [coaId], references: [id], onDelete: Cascade)
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("JournalEntryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("JournalEntryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([transactionId])
+  @@index([coaId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+// ============================================
+// STOCK CONTROL
+// ============================================
+
+model Unload {
+  id                    String         @id @default(cuid())
+  tankId                String
+  unloaderId            String
+  managerId             String?
+  purchaseTransactionId String? // Link ke purchase transaction yang sudah di-approve
+  initialOrderVolume    Int? // Volume pesanan awal dalam liter (bulat, misal: 8000L) - opsional jika sudah dibayar di finance
+  deliveredVolume       Int? // Volume yang di-deliver kali ini dalam liter (misal: 8000L)
+  literAmount           Int // Volume real saat sampai SPBU sebelum load dan yang di-unload ke tank dalam liter (bulat, misal: 7900L)
+  invoiceNumber         String?
+  imageUrl              String?
+  status                ApprovalStatus @default(PENDING)
+  notes                 String?        @db.Text
+
+  // Relations
+  tank                Tank         @relation(fields: [tankId], references: [id], onDelete: Cascade)
+  unloader            User         @relation("UnloaderUnloads", fields: [unloaderId], references: [id])
+  manager             User?        @relation("ApproverUnloads", fields: [managerId], references: [id])
+  purchaseTransaction Transaction? @relation("PurchaseUnloads", fields: [purchaseTransactionId], references: [id], onDelete: SetNull)
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("UnloadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("UnloadUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([tankId])
+  @@index([unloaderId])
+  @@index([managerId])
+  @@index([status])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([purchaseTransactionId])
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id           String  @id @default(cuid())
+  userId       String
+  type         String // "SUBSCRIPTION_EXPIRY_WARNING" | "SUBSCRIPTION_EXPIRED" | "PAYMENT_FAILED" | "SUBSCRIPTION_EXTENSION_REQUEST" | "SUBSCRIPTION_EXTENSION_RESPONSE"
+  title        String
+  message      String  @db.Text
+  isRead       Boolean @default(false)
+  gasStationId String?
+
+  // Tambahan untuk messaging & extension request
+  fromUserId String? // User yang mengirim pesan
+  replyToId  String? // ID notification yang di-reply
+  status     String? // "PENDING" | "APPROVED" | "REJECTED" | null (untuk extension request)
+  metadata   Json? // Metadata untuk extension request (durationMonths, planId, calculatedPrice, attachmentUrls, dll)
+
+  user       User           @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  fromUser   User?          @relation("NotificationFromUser", fields: [fromUserId], references: [id], onDelete: SetNull)
+  replyTo    Notification?  @relation("NotificationReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies    Notification[] @relation("NotificationReplies")
+  gasStation GasStation?    @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  @@index([userId, isRead])
+  @@index([gasStationId])
+  @@index([fromUserId])
+  @@index([replyToId])
+  @@index([status])
+  @@index([type, status]) // Untuk query extension requests
+}
+
+// ============================================
+// SUBSCRIPTION MANAGEMENT
+// ============================================
+
+model SubscriptionPlan {
+  id          String  @id @default(cuid())
+  name        String // "Monthly", "Yearly"
+  price       Int // Harga dalam Rupiah
+  duration    Int // Durasi dalam bulan
+  description String? @db.Text
+  isActive    Boolean @default(true)
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("SubscriptionPlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("SubscriptionPlanUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model PromoCode {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  discountType  String // "PERCENTAGE" | "FIXED"
+  discountValue Int // Nilai discount (persen atau rupiah)
+  maxUses       Int? // Maksimal penggunaan (null = unlimited)
+  usedCount     Int      @default(0)
+  validFrom     DateTime
+  validUntil    DateTime
+  isActive      Boolean  @default(true)
+  description   String?  @db.Text
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("PromoCodeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("PromoCodeUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@index([validFrom, validUntil])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model SubscriptionConfig {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  value       String  @db.Text
+  description String? @db.Text
+
+  // Audit trail
+  createdById String?
+  createdBy   User?    @relation("SubscriptionConfigCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("SubscriptionConfigUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@index([createdById])
+  @@index([updatedById])
+}
