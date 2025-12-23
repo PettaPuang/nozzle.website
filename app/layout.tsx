@@ -2,8 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/sonner";
-import { LandscapeOrientationWarning } from "@/components/welcome/landscape-orientation-warning";
-import { SessionProvider } from "@/components/providers/session-provider";
+import { LandscapeOrientationWarning } from "@/components/demo/welcome/landscape-orientation-warning";
 import "./globals.css";
 
 // Plus Jakarta Sans - ExtraLight (200) sebagai default
@@ -155,11 +154,9 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased font-sans font-extralight`}
       >
-        <SessionProvider>
-          <LandscapeOrientationWarning />
-          {children}
-          <Toaster richColors />
-        </SessionProvider>
+        <LandscapeOrientationWarning />
+        {children}
+        <Toaster richColors />
       </body>
     </html>
   );

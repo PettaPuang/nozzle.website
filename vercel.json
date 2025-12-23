@@ -3,9 +3,6 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["sin1"],
-  "env": {
-    "PRISMA_GENERATE_DATAPROXY": "false"
-  },
   "functions": {
     "app/**/*.ts": {
       "maxDuration": 30
@@ -13,12 +10,6 @@
     "app/**/*.tsx": {
       "maxDuration": 30
     }
-  },
-  "crons": [
-    {
-      "path": "/api/cron/monthly-closing",
-      "schedule": "0 0 1 * *"
-    }
-  ]
+  }
 }
 
