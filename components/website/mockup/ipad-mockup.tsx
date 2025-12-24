@@ -1,164 +1,194 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { TankPreview } from "./tank-preview";
+import { ChartPreview } from "./chart-preview";
 
 type IpadMockupProps = {
-  useStaticImage?: boolean;
-  staticImageUrl?: string;
   children?: React.ReactNode;
-  className?: string;
+  type?: "tank" | "chart";
 };
 
-export function IpadMockup({
-  useStaticImage = false,
-  staticImageUrl,
-  children,
-  className = "",
-}: IpadMockupProps) {
-  const [isLoaded, setIsLoaded] = useState(false);
+export function IpadMockup({ children, type }: IpadMockupProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
 
-  // Jika menggunakan gambar static
-  if (useStaticImage && staticImageUrl) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0 }}
-        className={`relative ${className}`}
-      >
-        <div className="relative w-full max-w-[1400px] lg:max-w-[1600px] mx-auto perspective-[2000px]">
-          {/* iPad Container with 3D Transform */}
-          <div
-            className="relative"
-            style={{
-              transformStyle: "preserve-3d",
-              transform: "rotateY(-15deg) rotateX(5deg)",
-            }}
-          >
-            {/* iPad Front with Screen */}
-            <div
-              className="relative bg-linear-to-br from-gray-700 via-gray-600 to-gray-700 rounded-[3rem] p-1.5 md:p-2 lg:p-2.5"
-              style={{
-                boxShadow:
-                  "0 10px 30px -5px rgba(0, 0, 0, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05) inset",
-                transformStyle: "preserve-3d",
-              }}
-            >
-              {/* Screen Bezel (Black Border) */}
-              <div className="relative bg-black rounded-[2.5rem] p-1.5 md:p-2 shadow-inner">
-                {/* Screen Content */}
-                <div
-                  className="relative bg-white dark:bg-gray-900 rounded-4xl overflow-hidden"
-                  style={{ aspectRatio: "2360 / 1640" }}
-                >
-                  <Image
-                    src={staticImageUrl}
-                    alt="App Preview"
-                    fill
-                    className="object-cover"
-                    priority
-                    onLoad={() => setIsLoaded(true)}
-                  />
-                  {!isLoaded && (
-                    <div className="absolute inset-0 bg-linear-to-br from-blue-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 animate-pulse" />
-                  )}
+  useEffect(() => {
+    const updateScale = () => {
+      if (!containerRef.current) return;
 
-                  {/* Screen Glare Effect */}
-                  <div className="absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent pointer-events-none" />
-                </div>
-              </div>
+      const container = containerRef.current;
+      const containerWidth = container.offsetWidth;
 
-              {/* Reflection on Front Glass */}
-              <div className="absolute inset-0 rounded-[3rem] bg-linear-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
+      // Reference width untuk scale 1.0 (100%)
+      // iPad: 1400px (landscape mockup) - sama dengan maxWidth untuk konsistensi dengan iPhone
+      const referenceWidth = 1400;
 
-  // Jika menggunakan children (live preview)
+      // Calculate scale berdasarkan container width
+      // Min scale: sama proporsi dengan iPhone untuk konsistensi di semua breakpoint
+      // iPhone: 900px reference, 0.5 min scale
+      // Untuk konsistensi yang sama, iPad juga menggunakan minScale 0.5
+      // Ini memastikan preview scalable dengan proporsi yang sama di semua breakpoint
+      // Max scale: 1.0
+      const minScale = 0.5;
+      const calculatedScale = containerWidth / referenceWidth;
+      const finalScale = Math.max(minScale, Math.min(1, calculatedScale));
+
+      setScale(finalScale);
+    };
+
+    // Initial calculation
+    updateScale();
+
+    // Update on resize - gunakan window resize untuk memastikan update di semua breakpoint
+    const handleResize = () => {
+      updateScale();
+    };
+
+    window.addEventListener("resize", handleResize);
+    const resizeObserver = new ResizeObserver(updateScale);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // Render preview berdasarkan type
+  const renderContent = () => {
+    if (type === "tank") {
+      return <TankPreview />;
+    }
+    if (type === "chart") {
+      return <ChartPreview />;
+    }
+    return children;
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0 }}
-      className={`relative ${className}`}
+      className="relative hidden lg:block"
     >
-      <div className="relative w-full max-w-[1400px] mx-auto perspective-[2000px]">
-        {/* iPad Container with 3D Transform */}
+      <div
+        ref={containerRef}
+        className="relative w-full mx-auto"
+        style={{
+          maxWidth: "min(1400px, 100%)",
+          width: "100%",
+          perspective: "2000px",
+        }}
+      >
+        {/* iPad Container with 3D Transform - Fixed untuk semua device */}
         <div
           className="relative"
           style={{
             transformStyle: "preserve-3d",
             transform: "rotateY(-15deg) rotateX(5deg)",
+            transformOrigin: "center center",
+            width: "100%",
           }}
         >
           {/* iPad Front with Screen */}
           <div
-            className="relative bg-linear-to-br from-gray-700 via-gray-600 to-gray-700 rounded-[3rem] p-1.5 md:p-2 lg:p-2.5"
+            className="relative bg-linear-to-br from-gray-700 via-gray-600 to-gray-700"
             style={{
-              boxShadow:
-                "0 10px 30px -5px rgba(0, 0, 0, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05) inset",
+              borderRadius: "clamp(1.5rem, 2.14vw, 3rem)",
+              padding: "clamp(0.375rem, 0.57vw, 0.5rem)", // 6px to 8px
+              boxShadow: `0 clamp(0.5rem, 0.71vw, 0.625rem) clamp(1.5rem, 2.14vw, 1.875rem) clamp(-0.25rem, -0.36vw, -0.313rem) rgba(0, 0, 0, 0.2), 
+                 0 clamp(0.25rem, 0.29vw, 0.25rem) clamp(0.625rem, 0.86vw, 0.75rem) clamp(-0.125rem, -0.14vw, -0.125rem) rgba(0, 0, 0, 0.15), 
+                 0 0 0 1px rgba(255, 255, 255, 0.05) inset`,
               transformStyle: "preserve-3d",
             }}
           >
             {/* Screen Bezel (Black Border) */}
-            <div className="relative bg-black rounded-[2.5rem] p-1.5 md:p-2 shadow-inner">
+            <div
+              className="relative bg-black shadow-inner"
+              style={{
+                borderRadius: "clamp(1.25rem, 1.79vw, 2.5rem)",
+                padding: "clamp(0.375rem, 0.57vw, 0.5rem)", // 6px to 8px
+              }}
+            >
               {/* Screen Content */}
               <div
-                className="relative bg-white dark:bg-gray-900 rounded-4xl overflow-hidden"
-                style={{ aspectRatio: "2360 / 1640" }}
+                className="relative bg-white dark:bg-gray-900 overflow-hidden w-full"
+                style={{
+                  aspectRatio: "3 / 2", // iPad Mini aspect ratio (2266 x 1488)
+                  minHeight: 0,
+                  borderRadius: "clamp(1rem, 1.43vw, 2rem)",
+                }}
               >
-                {/* Content */}
+                {/* Content dengan scaling */}
                 <div className="absolute inset-0 overflow-hidden">
-                  {children || (
-                    <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800">
-                      <div className="text-center space-y-4 p-8">
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{
-                            delay: 0.6,
-                            type: "spring",
-                            stiffness: 200,
-                          }}
-                          className="w-20 h-20 mx-auto bg-linear-to-br from-[#006FB8] to-[#005A8C] rounded-2xl flex items-center justify-center shadow-lg"
-                        >
-                          <span className="text-3xl font-bold text-white">
-                            N
-                          </span>
-                        </motion.div>
-                        <motion.h2
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.8 }}
-                          className="text-2xl font-bold text-gray-900 dark:text-white"
-                        >
-                          Welcome to Nozzl
-                        </motion.h2>
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 1 }}
-                          className="text-gray-600 dark:text-gray-400"
-                        >
-                          SPBU Management System
-                        </motion.p>
+                  <div
+                    className="origin-top-left h-full w-full"
+                    style={{
+                      transform: `scale(${scale})`,
+                      width: `${100 / scale}%`,
+                      height: `${100 / scale}%`,
+                    }}
+                  >
+                    {renderContent() || (
+                      <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800">
+                        <div className="text-center space-y-4 p-8">
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{
+                              delay: 0.6,
+                              type: "spring",
+                              stiffness: 200,
+                            }}
+                            className="w-20 h-20 mx-auto bg-linear-to-br from-[#006FB8] to-[#005A8C] rounded-2xl flex items-center justify-center shadow-lg"
+                          >
+                            <span className="text-3xl font-bold text-white">
+                              N
+                            </span>
+                          </motion.div>
+                          <motion.h2
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.8 }}
+                            className="text-2xl font-bold text-gray-900 dark:text-white"
+                          >
+                            Welcome to Nozzl
+                          </motion.h2>
+                          <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1 }}
+                            className="text-gray-600 dark:text-gray-400"
+                          >
+                            SPBU Management System
+                          </motion.p>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Screen Glare Effect */}
-                <div className="absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent pointer-events-none" />
+                <div
+                  className="absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent pointer-events-none"
+                  style={{
+                    borderRadius: "clamp(1rem, 1.43vw, 2rem)",
+                  }}
+                />
               </div>
             </div>
 
             {/* Reflection on Front Glass */}
-            <div className="absolute inset-0 rounded-[3rem] bg-linear-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
+            <div
+              className="absolute inset-0 bg-linear-to-br from-white/20 via-transparent to-transparent pointer-events-none"
+              style={{
+                borderRadius: "clamp(1.5rem, 2.14vw, 3rem)",
+              }}
+            />
           </div>
         </div>
       </div>

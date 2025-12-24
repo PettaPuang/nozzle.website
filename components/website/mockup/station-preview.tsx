@@ -1,15 +1,41 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { MapPin, Clock, Fuel, Building2, FileText } from "lucide-react";
 import { StationCard } from "@/components/demo/station/station-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import type { OperationalDataForClient } from "@/lib/types/demo";
+import { PertaminaStripes } from "@/components/ui/pertamina-stripes";
 
-type StationWithConnections = OperationalDataForClient["stations"][number] & {
+type StationWithConnections = {
+  id: string;
+  code: string;
+  name: string;
+  gasStationId: string;
+  tanks: Array<{
+    id: string;
+    code: string;
+    name: string;
+    productId: string;
+    capacity: number;
+    currentStock: number;
+    product: {
+      name: string;
+      sellingPrice: number;
+    };
+  }>;
+  nozzles: Array<{
+    id: string;
+    code: string;
+    name: string;
+    tankId: string;
+    productId: string;
+    product: {
+      name: string;
+      sellingPrice: number;
+    };
+  }>;
   tankConnections: Array<{
     id: string;
     tank: {
@@ -116,18 +142,6 @@ const mockStations: StationWithConnections[] = [
           sellingPrice: 14000,
         },
       },
-      {
-        id: "tank-004",
-        code: "T04",
-        name: "Tank Solar",
-        productId: "product-004",
-        capacity: 25000,
-        currentStock: 8500,
-        product: {
-          name: "Solar",
-          sellingPrice: 9500,
-        },
-      },
     ],
     nozzles: [
       {
@@ -141,17 +155,6 @@ const mockStations: StationWithConnections[] = [
           sellingPrice: 14000,
         },
       },
-      {
-        id: "nozzle-004",
-        code: "N04",
-        name: "Nozzle 4 - Solar",
-        tankId: "tank-004",
-        productId: "product-004",
-        product: {
-          name: "Solar",
-          sellingPrice: 9500,
-        },
-      },
     ],
     tankConnections: [
       {
@@ -163,60 +166,52 @@ const mockStations: StationWithConnections[] = [
           },
         },
       },
-      {
-        id: "conn-004",
-        tank: {
-          code: "T04",
-          product: {
-            name: "Solar",
-          },
-        },
-      },
     ],
   },
 ];
 
-export function StationPreview() {
+export function StationIphonePreview() {
   return (
     <div className="h-full w-full bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
       {/* Top Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 px-2 py-1.5 shrink-0">
-        <div className="flex items-center justify-between mb-1">
+      <div className="border-b border-gray-200 dark:border-gray-700 px-3 py-1.5 shrink-0">
+        <div className="flex items-start justify-between mb-1">
           <div className="flex items-center gap-1.5">
             <Avatar className="h-5 w-5">
-              <AvatarFallback className="text-[10px] bg-blue-100 text-blue-700">
+              <AvatarFallback className="text-[11px] bg-blue-100 text-blue-700">
                 OD
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-[10px] font-medium text-gray-900 dark:text-white">
+              <p className="text-[11px] font-medium text-gray-900 dark:text-white">
                 Selamat datang, ownerdemo
               </p>
-              <p className="text-[9px] text-gray-500">Owner</p>
+              <p className="text-[10px] text-gray-500">Owner</p>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-[11px] font-semibold text-gray-900 dark:text-white">
+                SPBU Pertamina 34-12345
+              </h1>
+              <Badge variant="default" className="text-[10px] px-1 py-0 h-4">
+                ACTIVE
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-0.5">
+                <MapPin className="h-2.5 w-2.5" />
+                <span>Jl. Sudirman No. 123, Jakarta Pusat</span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <Clock className="h-2.5 w-2.5" />
+                <span>06:00 - 22:00</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* SPBU Info Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 px-2 py-1.5 shrink-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <h1 className="text-[10px] font-semibold text-gray-900 dark:text-white">
-            SPBU Pertamina 34-12345
-          </h1>
-          <Badge variant="default" className="text-[9px] px-1 py-0 h-3">
-            ACTIVE
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2 text-[9px] text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-0.5">
-            <MapPin className="h-2.5 w-2.5" />
-            <span>Jl. Sudirman No. 123, Jakarta Pusat</span>
-          </div>
-          <div className="flex items-center gap-0.5">
-            <Clock className="h-2.5 w-2.5" />
-            <span>06:00 - 22:00</span>
-          </div>
+        <div className="mt-1">
+          <PertaminaStripes height="h-1" />
         </div>
       </div>
 
@@ -263,7 +258,7 @@ export function StationPreview() {
           value="stations"
           className="flex-1 overflow-y-auto px-2 py-2 mt-0"
         >
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             {mockStations.map((station, index) => (
               <motion.div
                 key={station.id}

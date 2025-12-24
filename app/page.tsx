@@ -1,12 +1,10 @@
-import {
-  WebsiteHeader,
-  WebsiteFooter,
-  HeroSection,
-  FeaturesSection,
-  BenefitsSection,
-  HowItWorksSection,
-  CTASection,
-} from "@/components/website";
+import { WebsiteHeader } from "@/components/website/header";
+import { WebsiteFooter } from "@/components/website/footer";
+import { HeroSection } from "@/components/website/hero-section";
+import { FeaturesSection } from "@/components/website/features-section";
+import { BenefitsSection } from "@/components/website/benefits-section";
+import { HowItWorksSection } from "@/components/website/how-it-works-section";
+import { CTASection } from "@/components/website/cta-section";
 
 export const dynamic = "force-dynamic";
 

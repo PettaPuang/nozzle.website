@@ -1,3 +1,5 @@
+import { LandscapeOrientationWarning } from "@/components/demo/welcome/landscape-orientation-warning";
+
 export const dynamic = 'force-dynamic';
 
 export default async function DemoLayout({
@@ -6,6 +8,11 @@ export default async function DemoLayout({
   children: React.ReactNode;
 }) {
   // Demo mode: no auth required
-  return <>{children}</>;
+  return (
+    <>
+      <LandscapeOrientationWarning />
+      {children}
+    </>
+  );
 }
 

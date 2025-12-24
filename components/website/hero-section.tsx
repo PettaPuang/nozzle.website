@@ -1,177 +1,120 @@
 "use client";
 
 import Image from "next/image";
-import {
-  IpadMockup,
-  IphoneLandscapeMockup,
-  WelcomeIphonePreview,
-  TankPreview,
-  ChartPreview,
-  StationIphonePreview,
-} from "./mockup";
+import { MockupShowcase } from "./mockup/mockup-showcase";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import TextType from "@/components/ui/reactbits/TextType";
 
+type MockupView = "welcome" | "tank" | "station" | "chart";
+
 export function HeroSection() {
-  const [currentView, setCurrentView] = useState<
-    "welcome" | "tank" | "station" | "chart"
-  >("welcome");
+  const [currentView, setCurrentView] = useState<MockupView>("welcome");
+  const [isDesktop, setIsDesktop] = useState(false);
 
+  const textTypeTexts = [
+    "SPBU Management System",
+    "Easy to Use",
+    "Reliable & Realtime Data",
+    "Full Control",
+  ];
+
+  // Detect desktop breakpoint (lg = 1024px)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentView((prev) => {
-        // Rotasi: welcome -> tank -> station -> chart -> welcome
-        if (prev === "welcome") return "tank";
-        if (prev === "tank") return "station";
-        if (prev === "station") return "chart";
-        return "welcome";
-      });
-    }, 5000); // Berganti setiap 5 detik
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
 
-    return () => clearInterval(interval);
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
+  // Handler untuk sinkronisasi dengan TextType
+  const handleTextComplete = (sentence: string, index: number) => {
+    if (!isDesktop) return;
+
+    // Map index teks ke view mockup
+    // index 0 -> welcome, index 1 -> tank, index 2 -> station, index 3 -> chart
+    const viewMap: MockupView[] = ["welcome", "tank", "station", "chart"];
+    // Ketika callback dipanggil dengan index, teks berikutnya adalah (index + 1)
+    const nextViewIndex = (index + 1) % viewMap.length;
+    setCurrentView(viewMap[nextViewIndex]);
+  };
+
   return (
-    <section className="relative bg-linear-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 overflow-x-hidden overflow-y-auto min-h-screen flex items-center">
+    <section className="relative bg-linear-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 min-h-screen flex items-start w-full">
       {/* Background Pattern */}
       <div
-        className="absolute inset-0 opacity-5 dark:opacity-10"
+        className="absolute inset-0 opacity-5 dark:opacity-10 z-0"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
           backgroundSize: "24px 24px",
         }}
       />
-      <div className="absolute inset-0 bg-linear-to-t from-white/50 dark:from-gray-900/50" />
+      <div className="absolute inset-0 bg-linear-to-t from-white/50 dark:from-gray-900/50 z-0" />
 
-      {/* Mockup sebagai Background - iPhone untuk welcome/station, iPad untuk tank/chart */}
-      <div className="absolute inset-0 lg:block hidden overflow-hidden z-10">
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3/4 h-full flex items-center justify-end pr-8 xl:pr-16">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentView}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className={`w-full max-w-[1400px] ${
-                currentView === "tank" || currentView === "chart"
-                  ? "translate-y-16"
-                  : ""
-              }`}
-            >
-              {currentView === "welcome" ? (
-                <IphoneLandscapeMockup>
-                  <WelcomeIphonePreview />
-                </IphoneLandscapeMockup>
-              ) : currentView === "tank" ? (
-                <IpadMockup>
-                  <TankPreview />
-                </IpadMockup>
-              ) : currentView === "station" ? (
-                <IphoneLandscapeMockup>
-                  <StationIphonePreview />
-                </IphoneLandscapeMockup>
-              ) : (
-                <IpadMockup>
-                  <ChartPreview />
-                </IpadMockup>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
+      {/* Content - Layout Desktop: Logo/TextType kiri (1/3), Mockup kanan (2/3) */}
+      <div className="relative w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 pt-0 z-10 overflow-visible min-h-screen flex flex-col">
+        <div className="w-full lg:flex flex-1">
+          {/* Kiri - Logo (1/3 di desktop) */}
+          <div className="w-full lg:w-1/3 flex flex-col">
+            {/* Baris 1 - Logo (Fixed Height) */}
+            <div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <Image
+                  src="/logo/Nozzl.svg"
+                  alt="Nozzl"
+                  width={200}
+                  height={75}
+                  priority
+                  loading="eager"
+                  className="w-auto h-auto max-w-[180px] sm:max-w-[220px] md:max-w-[300px] lg:max-w-[360px]"
+                />
+              </motion.div>
+            </div>
+          </div>
 
-      {/* TextType di kiri atas */}
-      <div className="absolute top-8 left-4 sm:left-6 lg:left-8 z-30">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative z-30 overflow-visible"
-        >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-white leading-tight whitespace-nowrap overflow-visible block relative z-30 w-max">
-            <TextType
-              text={[
-                "SPBU Management System",
-                "Full Control Management",
-                "Easy to Use",
-                "Reliable & Realtime Data",
-              ]}
-              typingSpeed={60}
-              pauseDuration={2500}
-              deletingSpeed={30}
-              initialDelay={0}
-              loop={true}
-              showCursor={true}
-              cursorCharacter="|"
-              as="span"
-              className="whitespace-nowrap relative z-30"
-            />
-          </h1>
-        </motion.div>
-      </div>
-
-      {/* Content Overlay */}
-      <div className="relative w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32 z-20">
-        <div className="lg:w-1/2 w-full relative z-30">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="space-y-6 lg:space-y-8"
-          >
-            {/* Logo Section */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col items-start gap-3 ml-2 md:ml-4 lg:ml-6 mt-32 md:mt-40 lg:mt-48"
-            >
-              <Image
-                src="/logo/Nozzl.svg"
-                alt="Nozzl"
-                width={200}
-                height={75}
-                priority
-                className="w-auto h-auto max-w-[240px] md:max-w-[300px] lg:max-w-[360px]"
-              />
-              <p className="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-300 italic font-light">
-                Your System Evolve
-              </p>
-            </motion.div>
-          </motion.div>
+          {/* Kanan - Mockup (2/3 di desktop, hidden di non-desktop) */}
+          <div className="hidden lg:flex lg:w-2/3 lg:items-start lg:justify-end">
+            <MockupShowcase currentView={currentView} />
+          </div>
         </div>
 
-        {/* Mockup untuk Mobile/Tablet - di bawah content */}
-        <div className="lg:hidden mt-12 relative">
-          <AnimatePresence mode="wait">
+        {/* TextType - Di paling bawah (bisa menembus mockup) */}
+        <div className="w-full px-4 lg:px-8 lg:absolute lg:left-0 lg:bottom-0 pb-8 lg:pb-16">
+          <div>
             <motion.div
-              key={currentView}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.5 }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
             >
-              {currentView === "welcome" ? (
-                <IphoneLandscapeMockup>
-                  <WelcomeIphonePreview />
-                </IphoneLandscapeMockup>
-              ) : currentView === "tank" ? (
-                <IpadMockup>
-                  <TankPreview />
-                </IpadMockup>
-              ) : currentView === "station" ? (
-                <IphoneLandscapeMockup>
-                  <StationIphonePreview />
-                </IphoneLandscapeMockup>
-              ) : (
-                <IpadMockup>
-                  <ChartPreview />
-                </IpadMockup>
-              )}
+              <h1
+                className="font-bold text-gray-900 dark:text-white leading-tight line-clamp-2"
+                style={{
+                  fontSize: "clamp(1.5rem, 3vw + 1rem, 5rem)",
+                  minHeight: "2.2em",
+                }}
+              >
+                <TextType
+                  text={textTypeTexts}
+                  typingSpeed={100}
+                  pauseDuration={3000}
+                  deletingSpeed={50}
+                  initialDelay={500}
+                  loop={true}
+                  showCursor={true}
+                  cursorCharacter="|"
+                  as="span"
+                  onSentenceComplete={handleTextComplete}
+                />
+              </h1>
             </motion.div>
-          </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>

@@ -114,21 +114,9 @@ export function TankCard({
                   viewBox="0 0 1000 100"
                   preserveAspectRatio="none"
                 >
-                  <motion.path
+                  <path
                     d="M0,50 Q250,0 500,50 T1000,50 L1000,100 L0,100 Z"
                     fill="rgba(255,255,255,0.25)"
-                    animate={{
-                      d: [
-                        "M0,50 Q250,0 500,50 T1000,50 L1000,100 L0,100 Z",
-                        "M0,50 Q250,100 500,50 T1000,50 L1000,100 L0,100 Z",
-                        "M0,50 Q250,0 500,50 T1000,50 L1000,100 L0,100 Z",
-                      ],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
                   />
                 </svg>
               </motion.div>
