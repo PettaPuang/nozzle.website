@@ -51,9 +51,7 @@ export function ProfitLossTable({
   gasStationId,
   dateRange: dateRangeProp,
 }: ProfitLossTableProps) {
-  // Demo mode: no session
-  const userRole = session?.user?.roleCode || "";
-  const userName = session?.user?.username;
+  // Demo mode: no session needed
 
   const [report, setReport] = useState<any>(null);
   const [stockReport, setStockReport] = useState<any>(null);

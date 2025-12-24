@@ -19,7 +19,7 @@ export function PertaminaStripes({
       style={skew ? { transform: `skewX(-${skewDegree}deg)` } : undefined}
     >
       <div
-        className="flex-[2]"
+        className="flex-2"
         style={{ backgroundColor: PERTAMINA_COLORS.blue }}
       />
       <div

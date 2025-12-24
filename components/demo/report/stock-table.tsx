@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { ProductBadge } from "@/components/reusable/badges/product-badge";
 import { formatNumber } from "@/lib/utils/format-client";
+import { MockDataService } from "@/lib/utils/mock-data";
 
 type TankStockData = {
   tankId: string;

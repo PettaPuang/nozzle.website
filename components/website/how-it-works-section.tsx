@@ -40,7 +40,7 @@ export function HowItWorksSection() {
             const Icon = step.icon;
             return (
               <div key={step.number} className="relative">
-                <Card className="h-full hover:shadow-lg transition-shadow">
+                <Card className="h-full">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-4xl font-bold text-gray-200 dark:text-gray-700">

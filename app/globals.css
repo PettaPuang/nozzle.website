@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -197,7 +196,6 @@
   /* Smooth scrolling for mobile */
   html {
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
 
   /* Modern ultra-thin scrollbar */
@@ -241,84 +239,10 @@
     .overflow-x-auto,
     [data-slot="scroll-area-viewport"] {
       -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
     }
   }
 }
 
-/* Tank Liquid Animations */
-@keyframes wave {
-  0% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(-25%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateY(100%);
-  }
-  100% {
-    transform: translateY(-100%);
-  }
-}
-
-.animate-wave {
-  animation: wave 3s linear infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 3s linear infinite;
-}
-
-@keyframes phone-rotate {
-  0%,
-  20% {
-    transform: rotate(0deg);
-  }
-  40%,
-  60% {
-    transform: rotate(90deg);
-  }
-  80%,
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
-.phone-rotate-animation {
-  animation: phone-rotate 3s ease-in-out infinite;
-  width: 80px;
-  height: 140px;
-  position: relative;
-  transform-origin: center center;
-}
-
-.phone-rotate-animation-small {
-  animation: phone-rotate 3s ease-in-out infinite;
-  width: 50px;
-  height: 90px;
-  position: relative;
-  transform-origin: center center;
-}
 
 .phone-frame {
   width: 100%;
@@ -395,7 +319,6 @@
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-top-color: rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-  animation: spin-slow 1s linear infinite;
 }
 
 /* Sonner Toast Optimization for Tablet */

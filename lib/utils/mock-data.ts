@@ -2,44 +2,44 @@
 const gasStationsData = [
   {
     id: "spbu-001",
-    name: "SPBU Pertamina 34-12345",
-    address: "Jl. Sudirman No. 123, Jakarta Pusat",
-    latitude: -6.2088,
-    longitude: 106.8456,
+    name: "SPBU 34-12345 Makassar",
+    address: "Jl. Gatot Subroto, Makassar, Sulawesi Selatan",
+    latitude: -5.135399,
+    longitude: 119.42379,
     openTime: "06:00",
     closeTime: "22:00",
     status: "ACTIVE",
     owner: {
       id: "owner-001",
-      name: "PT. Energi Nusantara",
+      name: "ownerdemo",
     },
   },
   {
     id: "spbu-002",
-    name: "SPBU Pertamina 34-12346",
-    address: "Jl. Gatot Subroto No. 456, Jakarta Selatan",
-    latitude: -6.2297,
-    longitude: 106.8003,
+    name: "SPBU 34-12346 Surabaya",
+    address: "Jl. Jemursari, Surabaya, Jawa Timur",
+    latitude: -7.257472,
+    longitude: 112.75209,
     openTime: "05:00",
     closeTime: "23:00",
     status: "ACTIVE",
     owner: {
       id: "owner-001",
-      name: "PT. Energi Nusantara",
+      name: "ownerdemo",
     },
   },
   {
     id: "spbu-003",
-    name: "SPBU Pertamina 34-12347",
-    address: "Jl. Thamrin No. 789, Jakarta Pusat",
-    latitude: -6.1944,
-    longitude: 106.8229,
+    name: "SPBU 34-12347 Jakarta",
+    address: "Jl. MT Haryono, Jakarta Selatan",
+    latitude: -6.208763,
+    longitude: 106.845599,
     openTime: "06:00",
     closeTime: "22:00",
     status: "INACTIVE",
     owner: {
-      id: "owner-002",
-      name: "CV. Bumi Sejahtera",
+      id: "owner-001",
+      name: "ownerdemo",
     },
   },
 ];
@@ -77,6 +77,14 @@ const productsData = [
     purchasePrice: 8000,
     sellingPrice: 9500,
   },
+  {
+    id: "product-005",
+    gasStationId: "spbu-001",
+    name: "Dexlite",
+    ron: "88",
+    purchasePrice: 7500,
+    sellingPrice: 9000,
+  },
 ];
 
 const tanksData = [
@@ -88,7 +96,7 @@ const tanksData = [
     name: "Tank Pertalite 1",
     capacity: 30000,
     initialStock: 15000,
-    currentStock: 12500,
+    currentStock: 2347, // Hampir habis
     product: {
       name: "Pertalite",
       sellingPrice: 10000,
@@ -102,7 +110,7 @@ const tanksData = [
     name: "Tank Pertamax 1",
     capacity: 30000,
     initialStock: 12000,
-    currentStock: 9800,
+    currentStock: 9876, // Angka keriting
     product: {
       name: "Pertamax",
       sellingPrice: 12000,
@@ -116,7 +124,7 @@ const tanksData = [
     name: "Tank Pertamax Turbo",
     capacity: 20000,
     initialStock: 8000,
-    currentStock: 6500,
+    currentStock: 6543, // Angka keriting
     product: {
       name: "Pertamax Turbo",
       sellingPrice: 14000,
@@ -130,10 +138,38 @@ const tanksData = [
     name: "Tank Solar",
     capacity: 25000,
     initialStock: 10000,
-    currentStock: 8500,
+    currentStock: 23456, // Hampir penuh
     product: {
       name: "Solar",
       sellingPrice: 9500,
+    },
+  },
+  {
+    id: "tank-005",
+    gasStationId: "spbu-001",
+    productId: "product-001",
+    code: "T05",
+    name: "Tank Pertalite 2",
+    capacity: 30000,
+    initialStock: 15000,
+    currentStock: 15234, // Angka keriting
+    product: {
+      name: "Pertalite",
+      sellingPrice: 10000,
+    },
+  },
+  {
+    id: "tank-006",
+    gasStationId: "spbu-001",
+    productId: "product-005",
+    code: "T06",
+    name: "Tank Dexlite",
+    capacity: 30000,
+    initialStock: 12000,
+    currentStock: 11234, // Angka keriting
+    product: {
+      name: "Dexlite",
+      sellingPrice: 9000,
     },
   },
 ];
@@ -151,11 +187,19 @@ const stationsData = [
     gasStationId: "spbu-001",
     code: "S02",
     name: "Station 2",
-    tanks: ["tank-003", "tank-004"],
+    tanks: ["tank-002", "tank-003"],
+  },
+  {
+    id: "station-003",
+    gasStationId: "spbu-001",
+    code: "S03",
+    name: "Station 3",
+    tanks: ["tank-004", "tank-006"],
   },
 ];
 
 const nozzlesData = [
+  // Station 1: 2 nozzle pertalite, 1 nozzle pertamax
   {
     id: "nozzle-001",
     stationId: "station-001",
@@ -171,37 +215,174 @@ const nozzlesData = [
   {
     id: "nozzle-002",
     stationId: "station-001",
+    tankId: "tank-001",
+    productId: "product-001",
+    code: "N02",
+    name: "Nozzle 2 - Pertalite",
+    product: {
+      name: "Pertalite",
+      sellingPrice: 10000,
+    },
+  },
+  {
+    id: "nozzle-003",
+    stationId: "station-001",
     tankId: "tank-002",
     productId: "product-002",
-    code: "N02",
-    name: "Nozzle 2 - Pertamax",
+    code: "N03",
+    name: "Nozzle 3 - Pertamax",
+    product: {
+      name: "Pertamax",
+      sellingPrice: 12000,
+    },
+  },
+  // Station 2: 1 pertamax, 1 pertamax turbo
+  {
+    id: "nozzle-004",
+    stationId: "station-002",
+    tankId: "tank-002",
+    productId: "product-002",
+    code: "N04",
+    name: "Nozzle 4 - Pertamax",
     product: {
       name: "Pertamax",
       sellingPrice: 12000,
     },
   },
   {
-    id: "nozzle-003",
+    id: "nozzle-005",
     stationId: "station-002",
     tankId: "tank-003",
     productId: "product-003",
-    code: "N03",
-    name: "Nozzle 3 - Pertamax Turbo",
+    code: "N05",
+    name: "Nozzle 5 - Pertamax Turbo",
     product: {
       name: "Pertamax Turbo",
       sellingPrice: 14000,
     },
   },
+  // Station 3: 2 bisosolar, 1 dexlite
   {
-    id: "nozzle-004",
-    stationId: "station-002",
+    id: "nozzle-006",
+    stationId: "station-003",
     tankId: "tank-004",
     productId: "product-004",
-    code: "N04",
-    name: "Nozzle 4 - Solar",
+    code: "N06",
+    name: "Nozzle 6 - Bisosolar",
     product: {
       name: "Solar",
       sellingPrice: 9500,
+    },
+  },
+  {
+    id: "nozzle-007",
+    stationId: "station-003",
+    tankId: "tank-004",
+    productId: "product-004",
+    code: "N07",
+    name: "Nozzle 7 - Bisosolar",
+    product: {
+      name: "Solar",
+      sellingPrice: 9500,
+    },
+  },
+  {
+    id: "nozzle-008",
+    stationId: "station-003",
+    tankId: "tank-006",
+    productId: "product-005",
+    code: "N08",
+    name: "Nozzle 8 - Dexlite",
+    product: {
+      name: "Dexlite",
+      sellingPrice: 9000,
+    },
+  },
+];
+
+const operatorsData = [
+  {
+    id: "operator-001",
+    name: "Budi",
+    avatar: "/avatars/operator-01.svg",
+  },
+  {
+    id: "operator-002",
+    name: "Siti",
+    avatar: "/avatars/operator-02.svg",
+  },
+  {
+    id: "operator-003",
+    name: "Joko",
+    avatar: "/avatars/operator-03.svg",
+  },
+  {
+    id: "operator-004",
+    name: "Wahyu",
+    avatar: "/avatars/operator-01.svg",
+  },
+];
+
+const shiftsData = [
+  // Station 1 - History shifts (tidak active)
+  {
+    id: "shift-001",
+    stationId: "station-001",
+    operatorId: "operator-001",
+    shift: "PAGI",
+    startTime: "2024-01-15T06:00:00",
+    endTime: "2024-01-15T14:00:00",
+    status: "COMPLETED",
+    hasOpenReading: true,
+    hasCloseReading: true,
+    operator: {
+      name: "Budi",
+      avatar: "/avatars/operator-01.svg",
+    },
+  },
+  {
+    id: "shift-003",
+    stationId: "station-001",
+    operatorId: "operator-003",
+    shift: "SIANG",
+    startTime: "2024-01-15T14:00:00",
+    endTime: "2024-01-15T22:00:00",
+    status: "COMPLETED",
+    hasOpenReading: true,
+    hasCloseReading: true,
+    operator: {
+      name: "Joko",
+      avatar: "/avatars/operator-03.svg",
+    },
+  },
+  // Station 2 - Active shift
+  {
+    id: "shift-002",
+    stationId: "station-002",
+    operatorId: "operator-002",
+    shift: "SIANG",
+    startTime: "2024-01-15T14:00:00",
+    status: "ACTIVE",
+    hasOpenReading: true,
+    hasCloseReading: false,
+    operator: {
+      name: "Siti",
+      avatar: "/avatars/operator-02.svg",
+    },
+  },
+  // Station 3 - Active shift
+  {
+    id: "shift-004",
+    stationId: "station-003",
+    operatorId: "operator-004",
+    shift: "SIANG",
+    startTime: "2024-01-15T14:00:00",
+    status: "ACTIVE",
+    hasOpenReading: true,
+    hasCloseReading: false,
+    operator: {
+      name: "Wahyu",
+      avatar: "/avatars/operator-01.svg",
     },
   },
 ];
@@ -243,6 +424,13 @@ const salesReportData = {
       revenue: 14250000,
       transactions: 70,
     },
+    {
+      productId: "product-005",
+      productName: "Dexlite",
+      volume: 1000,
+      revenue: 9000000,
+      transactions: 50,
+    },
   ],
   dailySales: [
     {
@@ -250,30 +438,390 @@ const salesReportData = {
       volume: 420,
       revenue: 4200000,
       transactions: 28,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 200 },
+        { productId: "product-002", productName: "Pertamax", volume: 144 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 56 },
+        { productId: "product-004", productName: "Solar", volume: 20 },
+        { productId: "product-005", productName: "Dexlite", volume: 15 },
+      ],
     },
     {
       date: "2024-01-02",
       volume: 450,
       revenue: 4500000,
       transactions: 30,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 250 },
+        { productId: "product-002", productName: "Pertamax", volume: 160 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 72 },
+        { productId: "product-004", productName: "Solar", volume: 24 },
+        { productId: "product-005", productName: "Dexlite", volume: 18 },
+      ],
     },
     {
       date: "2024-01-03",
       volume: 480,
       revenue: 4800000,
       transactions: 32,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 275 },
+        { productId: "product-002", productName: "Pertamax", volume: 176 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 80 },
+        { productId: "product-004", productName: "Solar", volume: 27 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
     },
     {
       date: "2024-01-04",
       volume: 400,
       revenue: 4000000,
       transactions: 27,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 225 },
+        { productId: "product-002", productName: "Pertamax", volume: 152 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 68 },
+        { productId: "product-004", productName: "Solar", volume: 21 },
+        { productId: "product-005", productName: "Dexlite", volume: 17 },
+      ],
     },
     {
       date: "2024-01-05",
       volume: 520,
       revenue: 5200000,
       transactions: 35,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 300 },
+        { productId: "product-002", productName: "Pertamax", volume: 168 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 88 },
+        { productId: "product-004", productName: "Solar", volume: 30 },
+        { productId: "product-005", productName: "Dexlite", volume: 22 },
+      ],
+    },
+    {
+      date: "2024-01-06",
+      volume: 480,
+      revenue: 4800000,
+      transactions: 32,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 280 },
+        { productId: "product-002", productName: "Pertamax", volume: 160 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 80 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-07",
+      volume: 510,
+      revenue: 5100000,
+      transactions: 34,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 290 },
+        { productId: "product-002", productName: "Pertamax", volume: 164 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 84 },
+        { productId: "product-004", productName: "Solar", volume: 29 },
+        { productId: "product-005", productName: "Dexlite", volume: 21 },
+      ],
+    },
+    {
+      date: "2024-01-08",
+      volume: 440,
+      revenue: 4400000,
+      transactions: 29,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 260 },
+        { productId: "product-002", productName: "Pertamax", volume: 148 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 72 },
+        { productId: "product-004", productName: "Solar", volume: 26 },
+        { productId: "product-005", productName: "Dexlite", volume: 19 },
+      ],
+    },
+    {
+      date: "2024-01-09",
+      volume: 490,
+      revenue: 4900000,
+      transactions: 33,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 285 },
+        { productId: "product-002", productName: "Pertamax", volume: 162 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 82 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-10",
+      volume: 530,
+      revenue: 5300000,
+      transactions: 36,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 310 },
+        { productId: "product-002", productName: "Pertamax", volume: 170 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 90 },
+        { productId: "product-004", productName: "Solar", volume: 31 },
+        { productId: "product-005", productName: "Dexlite", volume: 23 },
+      ],
+    },
+    {
+      date: "2024-01-11",
+      volume: 460,
+      revenue: 4600000,
+      transactions: 31,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 270 },
+        { productId: "product-002", productName: "Pertamax", volume: 154 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 74 },
+        { productId: "product-004", productName: "Solar", volume: 27 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-12",
+      volume: 500,
+      revenue: 5000000,
+      transactions: 34,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 295 },
+        { productId: "product-002", productName: "Pertamax", volume: 166 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 86 },
+        { productId: "product-004", productName: "Solar", volume: 29 },
+        { productId: "product-005", productName: "Dexlite", volume: 21 },
+      ],
+    },
+    {
+      date: "2024-01-13",
+      volume: 470,
+      revenue: 4700000,
+      transactions: 32,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 275 },
+        { productId: "product-002", productName: "Pertamax", volume: 158 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 78 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-14",
+      volume: 540,
+      revenue: 5400000,
+      transactions: 37,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 315 },
+        { productId: "product-002", productName: "Pertamax", volume: 172 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 92 },
+        { productId: "product-004", productName: "Solar", volume: 32 },
+        { productId: "product-005", productName: "Dexlite", volume: 24 },
+      ],
+    },
+    {
+      date: "2024-01-15",
+      volume: 450,
+      revenue: 4500000,
+      transactions: 30,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 265 },
+        { productId: "product-002", productName: "Pertamax", volume: 150 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 70 },
+        { productId: "product-004", productName: "Solar", volume: 26 },
+        { productId: "product-005", productName: "Dexlite", volume: 19 },
+      ],
+    },
+    {
+      date: "2024-01-16",
+      volume: 490,
+      revenue: 4900000,
+      transactions: 33,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 285 },
+        { productId: "product-002", productName: "Pertamax", volume: 162 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 82 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-17",
+      volume: 510,
+      revenue: 5100000,
+      transactions: 34,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 295 },
+        { productId: "product-002", productName: "Pertamax", volume: 166 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 86 },
+        { productId: "product-004", productName: "Solar", volume: 29 },
+        { productId: "product-005", productName: "Dexlite", volume: 21 },
+      ],
+    },
+    {
+      date: "2024-01-18",
+      volume: 480,
+      revenue: 4800000,
+      transactions: 32,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 280 },
+        { productId: "product-002", productName: "Pertamax", volume: 160 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 80 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-19",
+      volume: 520,
+      revenue: 5200000,
+      transactions: 35,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 300 },
+        { productId: "product-002", productName: "Pertamax", volume: 168 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 88 },
+        { productId: "product-004", productName: "Solar", volume: 30 },
+        { productId: "product-005", productName: "Dexlite", volume: 22 },
+      ],
+    },
+    {
+      date: "2024-01-20",
+      volume: 500,
+      revenue: 5000000,
+      transactions: 34,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 290 },
+        { productId: "product-002", productName: "Pertamax", volume: 164 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 84 },
+        { productId: "product-004", productName: "Solar", volume: 29 },
+        { productId: "product-005", productName: "Dexlite", volume: 21 },
+      ],
+    },
+    {
+      date: "2024-01-21",
+      volume: 470,
+      revenue: 4700000,
+      transactions: 32,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 275 },
+        { productId: "product-002", productName: "Pertamax", volume: 158 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 78 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-22",
+      volume: 530,
+      revenue: 5300000,
+      transactions: 36,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 310 },
+        { productId: "product-002", productName: "Pertamax", volume: 170 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 90 },
+        { productId: "product-004", productName: "Solar", volume: 31 },
+        { productId: "product-005", productName: "Dexlite", volume: 23 },
+      ],
+    },
+    {
+      date: "2024-01-23",
+      volume: 460,
+      revenue: 4600000,
+      transactions: 31,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 270 },
+        { productId: "product-002", productName: "Pertamax", volume: 154 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 74 },
+        { productId: "product-004", productName: "Solar", volume: 27 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-24",
+      volume: 490,
+      revenue: 4900000,
+      transactions: 33,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 285 },
+        { productId: "product-002", productName: "Pertamax", volume: 162 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 82 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-25",
+      volume: 510,
+      revenue: 5100000,
+      transactions: 34,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 295 },
+        { productId: "product-002", productName: "Pertamax", volume: 166 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 86 },
+        { productId: "product-004", productName: "Solar", volume: 29 },
+        { productId: "product-005", productName: "Dexlite", volume: 21 },
+      ],
+    },
+    {
+      date: "2024-01-26",
+      volume: 480,
+      revenue: 4800000,
+      transactions: 32,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 280 },
+        { productId: "product-002", productName: "Pertamax", volume: 160 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 80 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-27",
+      volume: 540,
+      revenue: 5400000,
+      transactions: 37,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 315 },
+        { productId: "product-002", productName: "Pertamax", volume: 172 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 92 },
+        { productId: "product-004", productName: "Solar", volume: 32 },
+        { productId: "product-005", productName: "Dexlite", volume: 24 },
+      ],
+    },
+    {
+      date: "2024-01-28",
+      volume: 500,
+      revenue: 5000000,
+      transactions: 34,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 290 },
+        { productId: "product-002", productName: "Pertamax", volume: 164 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 84 },
+        { productId: "product-004", productName: "Solar", volume: 29 },
+        { productId: "product-005", productName: "Dexlite", volume: 21 },
+      ],
+    },
+    {
+      date: "2024-01-29",
+      volume: 470,
+      revenue: 4700000,
+      transactions: 32,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 275 },
+        { productId: "product-002", productName: "Pertamax", volume: 158 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 78 },
+        { productId: "product-004", productName: "Solar", volume: 28 },
+        { productId: "product-005", productName: "Dexlite", volume: 20 },
+      ],
+    },
+    {
+      date: "2024-01-30",
+      volume: 520,
+      revenue: 5200000,
+      transactions: 35,
+      byProduct: [
+        { productId: "product-001", productName: "Pertalite", volume: 300 },
+        { productId: "product-002", productName: "Pertamax", volume: 168 },
+        { productId: "product-003", productName: "Pertamax Turbo", volume: 88 },
+        { productId: "product-004", productName: "Solar", volume: 30 },
+        { productId: "product-005", productName: "Dexlite", volume: 22 },
+      ],
     },
   ],
 };
@@ -288,9 +836,9 @@ const stockReportData = {
       tankName: "Tank Pertalite 1",
       productName: "Pertalite",
       capacity: 30000,
-      currentStock: 12500,
-      stockPercentage: 41.67,
-      status: "NORMAL",
+      currentStock: 2347,
+      stockPercentage: 7.82,
+      status: "CRITICAL",
     },
     {
       tankId: "tank-002",
@@ -298,8 +846,8 @@ const stockReportData = {
       tankName: "Tank Pertamax 1",
       productName: "Pertamax",
       capacity: 30000,
-      currentStock: 9800,
-      stockPercentage: 32.67,
+      currentStock: 9876,
+      stockPercentage: 32.92,
       status: "LOW",
     },
     {
@@ -308,8 +856,8 @@ const stockReportData = {
       tankName: "Tank Pertamax Turbo",
       productName: "Pertamax Turbo",
       capacity: 20000,
-      currentStock: 6500,
-      stockPercentage: 32.5,
+      currentStock: 6543,
+      stockPercentage: 32.72,
       status: "LOW",
     },
     {
@@ -318,15 +866,15 @@ const stockReportData = {
       tankName: "Tank Solar",
       productName: "Solar",
       capacity: 25000,
-      currentStock: 8500,
-      stockPercentage: 34.0,
-      status: "LOW",
+      currentStock: 23456,
+      stockPercentage: 93.82,
+      status: "NORMAL",
     },
   ],
   summary: {
     totalCapacity: 105000,
-    totalStock: 37300,
-    totalStockPercentage: 35.52,
+    totalStock: 42222,
+    totalStockPercentage: 40.21,
     lowStockCount: 3,
   },
 };
@@ -457,6 +1005,8 @@ export type MockProduct = (typeof productsData)[number];
 export type MockTank = (typeof tanksData)[number];
 export type MockStation = (typeof stationsData)[number];
 export type MockNozzle = (typeof nozzlesData)[number];
+export type MockOperator = (typeof operatorsData)[number];
+export type MockShift = (typeof shiftsData)[number];
 export type MockSalesReport = typeof salesReportData;
 export type MockStockReport = typeof stockReportData;
 export type MockFinancialReport = typeof financialReportData;
@@ -536,5 +1086,86 @@ export class MockDataService {
       return incomeReportData;
     }
     return null;
+  }
+
+  static getOperators(): MockOperator[] {
+    return operatorsData;
+  }
+
+  static getOperatorById(id: string): MockOperator | undefined {
+    return operatorsData.find((op: MockOperator) => op.id === id);
+  }
+
+  static getActiveShiftByStationId(
+    stationId: string
+  ): (Omit<MockShift, "startTime"> & { startTime: Date }) | null {
+    const shift = shiftsData.find(
+      (s: MockShift) => s.stationId === stationId && s.status === "ACTIVE"
+    );
+    if (!shift) return null;
+    return {
+      ...shift,
+      startTime: new Date(shift.startTime),
+    };
+  }
+
+  static getShiftsByStationId(stationId: string): MockShift[] {
+    return shiftsData.filter((s: MockShift) => s.stationId === stationId);
+  }
+
+  static getTodayShiftsByStationId(stationId: string): (Omit<
+    MockShift,
+    "startTime" | "endTime"
+  > & {
+    startTime: Date;
+    endTime?: Date;
+  })[] {
+    // For preview: get all shifts for the station (not just today)
+    // This ensures history shifts are always visible in preview
+    const shifts = shiftsData.filter(
+      (s: MockShift) => s.stationId === stationId
+    );
+    return shifts.map((shift) => ({
+      ...shift,
+      startTime: new Date(shift.startTime),
+      endTime: shift.endTime ? new Date(shift.endTime) : undefined,
+    }));
+  }
+
+  static getChartData(gasStationId: string): Array<{
+    date: string;
+    [productKey: string]: number | string;
+  }> {
+    const salesReport = this.getSalesReport(gasStationId);
+    if (!salesReport) return [];
+
+    return salesReport.dailySales.map((daily) => {
+      const chartData: {
+        date: string;
+        [productKey: string]: number | string;
+      } = {
+        date: daily.date,
+      };
+
+      // Add volume per product from dailySales.byProduct if available
+      // Transform product name to match chart key format: lowercase, remove spaces, and add _volume suffix
+      if (daily.byProduct && Array.isArray(daily.byProduct)) {
+        daily.byProduct.forEach((product) => {
+          const productKey =
+            product.productName.toLowerCase().replace(/\s+/g, "") + "_volume";
+          chartData[productKey] = product.volume;
+        });
+      } else {
+        // Fallback: distribute volume evenly if byProduct not available
+        salesReport.byProduct.forEach((product) => {
+          const baseVolume = product.volume / salesReport.dailySales.length;
+          const productKey =
+            product.productName.toLowerCase().replace(/\s+/g, "") + "_volume";
+          chartData[productKey] = Math.round(baseVolume);
+        });
+      }
+
+      return chartData;
+    });
   }
 }

@@ -22,7 +22,7 @@ export function WebsiteHeader() {
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="transition-transform duration-300 hover:scale-110 focus:outline-none"
+              className="focus:outline-none"
               aria-label="Toggle menu"
             >
               <Image
@@ -30,7 +30,7 @@ export function WebsiteHeader() {
                 alt="Nozzl"
                 width={32}
                 height={32}
-                className="h-8 w-8 transition-transform duration-300"
+                className="h-8 w-8"
               />
             </button>
 
@@ -41,7 +41,7 @@ export function WebsiteHeader() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#006FB8] dark:hover:text-[#006FB8] transition-colors whitespace-nowrap"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#006FB8] dark:hover:text-[#006FB8] whitespace-nowrap"
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.name}

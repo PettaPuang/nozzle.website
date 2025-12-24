@@ -1,16 +1,22 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { WelcomeIphonePreview } from "./welcome-preview";
 import { StationIphonePreview } from "./station-preview";
+import { TankIphonePreview } from "./tank-iphone-preview";
+import { ChartIphonePreview } from "./chart-iphone-preview";
 
 type IphoneMockupProps = {
   children?: React.ReactNode;
-  type?: "welcome" | "station";
+  type?: "welcome" | "station" | "tank" | "chart";
+  flat?: boolean; // Jika true, tidak ada efek 3D kemiringan
 };
 
-export function IphoneMockup({ children, type }: IphoneMockupProps) {
+export function IphoneMockup({
+  children,
+  type,
+  flat = false,
+}: IphoneMockupProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -57,15 +63,16 @@ export function IphoneMockup({ children, type }: IphoneMockupProps) {
     if (type === "station") {
       return <StationIphonePreview />;
     }
+    if (type === "tank") {
+      return <TankIphonePreview />;
+    }
+    if (type === "chart") {
+      return <ChartIphonePreview />;
+    }
     return children;
   };
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0 }}
-      className="relative hidden lg:block mt-8 sm:mt-12 md:mt-16 lg:mt-20 xl:mt-24 2xl:mt-28"
-    >
+    <div className="relative block w-full">
       <div
         ref={containerRef}
         className="relative w-full mx-auto"
@@ -75,13 +82,13 @@ export function IphoneMockup({ children, type }: IphoneMockupProps) {
           perspective: "2000px",
         }}
       >
-        {/* iPhone Frame - Landscape - Modern Realistic Design dengan kemiringan 3D */}
+        {/* iPhone Frame - Landscape - Modern Realistic Design */}
         <div
           className="relative z-10"
           style={{
-            transformStyle: "preserve-3d",
-            transform: "rotateY(-30deg) rotateX(8deg)",
-            transformOrigin: "right center",
+            transformStyle: flat ? "flat" : "preserve-3d",
+            transform: flat ? "none" : "rotateY(-25deg) rotateX(5deg)",
+            transformOrigin: "center center",
             width: "100%",
           }}
         >
@@ -185,28 +192,14 @@ export function IphoneMockup({ children, type }: IphoneMockupProps) {
                     {renderContent() || (
                       <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
                         <div className="text-center space-y-4 p-8">
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{
-                              delay: 0.6,
-                              type: "spring",
-                              stiffness: 200,
-                            }}
-                            className="w-20 h-20 mx-auto bg-linear-to-br from-[#006FB8] to-[#005A8C] rounded-2xl flex items-center justify-center shadow-xl"
-                          >
+                          <div className="w-20 h-20 mx-auto bg-linear-to-br from-[#006FB8] to-[#005A8C] rounded-2xl flex items-center justify-center shadow-xl">
                             <span className="text-3xl font-bold text-white">
                               N
                             </span>
-                          </motion.div>
-                          <motion.h2
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.8 }}
-                            className="text-2xl font-bold text-gray-900 dark:text-white"
-                          >
+                          </div>
+                          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                             Welcome to Nozzl
-                          </motion.h2>
+                          </h2>
                         </div>
                       </div>
                     )}
@@ -277,33 +270,8 @@ export function IphoneMockup({ children, type }: IphoneMockupProps) {
             }}
           />
         </div>
-
-        {/* Floating particles effect (optional - for premium look) */}
-        <div className="absolute inset-0 pointer-events-none -z-30">
-          {[...Array(6)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute bg-blue-400/20 rounded-full"
-              style={{
-                left: `${20 + i * 15}%`,
-                top: `${30 + (i % 3) * 20}%`,
-                width: "clamp(0.25rem, 0.44vw, 0.25rem)", // 4px fixed
-                height: "clamp(0.25rem, 0.44vw, 0.25rem)", // 4px fixed
-              }}
-              animate={{
-                y: [-10, 10, -10],
-                opacity: [0.2, 0.5, 0.2],
-              }}
-              transition={{
-                duration: 3 + i * 0.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

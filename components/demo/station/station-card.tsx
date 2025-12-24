@@ -45,6 +45,16 @@ type StationCardProps = {
       avatar?: string | null;
     };
   } | null;
+  todayShifts?: Array<{
+    id: string;
+    shift: string;
+    startTime: Date;
+    endTime?: Date;
+    operator?: {
+      name: string;
+      avatar?: string | null;
+    };
+  }>;
   // Demo mode: removed unused props
 };
 
@@ -56,11 +66,11 @@ export function StationCard({
   gasStationCloseTime,
   userRole,
   activeShift,
+  todayShifts = [],
 }: StationCardProps) {
   // Demo mode: no detail sheet
-  // Demo mode: no active shift, view-only
-  const shiftData = null;
-  const todayShifts: any[] = [];
+  // Use activeShift as shiftData if available
+  const shiftData = activeShift || null;
 
   // Demo mode: no check-in validation needed
   const getInitialCheckInValidation = () => {

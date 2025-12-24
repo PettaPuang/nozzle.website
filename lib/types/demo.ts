@@ -90,6 +90,15 @@ export type OperationalDataForClient = {
         sellingPrice: number;
       };
     }>;
+    tankConnections: Array<{
+      id: string;
+      tank: {
+        code: string;
+        product: {
+          name: string;
+        };
+      };
+    }>;
   }>;
   gasStation: {
     openTime: string | null;

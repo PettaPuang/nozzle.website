@@ -53,7 +53,7 @@ export function FeaturesSection() {
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
-              <Card key={feature.title} className="hover:shadow-lg transition-shadow">
+              <Card key={feature.title}>
                 <CardHeader>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">

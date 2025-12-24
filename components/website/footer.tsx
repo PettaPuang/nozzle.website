@@ -62,7 +62,7 @@ export function WebsiteFooter() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-gray-400 hover:text-white transition-colors"
+                    className="text-sm text-gray-400 hover:text-white"
                   >
                     {item.name}
                   </Link>
@@ -81,7 +81,7 @@ export function WebsiteFooter() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-gray-400 hover:text-white transition-colors"
+                    className="text-sm text-gray-400 hover:text-white"
                   >
                     {item.name}
                   </Link>

@@ -85,7 +85,23 @@ export default async function GasStationPage({ params }: PageProps) {
             sellingPrice: n.product.sellingPrice,
           },
         })),
+      tankConnections: tanks
+        .filter((t) => s.tanks.includes(t.id))
+        .map((t) => ({
+          id: `connection-${t.id}`,
+          tank: {
+            code: t.code,
+            product: {
+              name: t.product.name,
+            },
+          },
+        })),
     })),
+    gasStation: {
+      openTime: gasStation.openTime,
+      closeTime: gasStation.closeTime,
+      userActiveShiftInOtherStation: null,
+    },
   };
 
   const tanksWithStock = tanks.map((t) => ({

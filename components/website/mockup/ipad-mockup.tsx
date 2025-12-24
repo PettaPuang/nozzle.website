@@ -1,13 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { TankPreview } from "./tank-preview";
 import { ChartPreview } from "./chart-preview";
+import { WelcomeIpadPreview } from "./welcome-ipad-preview";
+import { StationIpadPreview } from "./station-ipad-preview";
 
 type IpadMockupProps = {
   children?: React.ReactNode;
-  type?: "tank" | "chart";
+  type?: "tank" | "chart" | "welcome" | "station";
 };
 
 export function IpadMockup({ children, type }: IpadMockupProps) {
@@ -66,15 +67,16 @@ export function IpadMockup({ children, type }: IpadMockupProps) {
     if (type === "chart") {
       return <ChartPreview />;
     }
+    if (type === "welcome") {
+      return <WelcomeIpadPreview />;
+    }
+    if (type === "station") {
+      return <StationIpadPreview />;
+    }
     return children;
   };
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0 }}
-      className="relative hidden lg:block"
-    >
+    <div className="relative hidden lg:block">
       <div
         ref={containerRef}
         className="relative w-full mx-auto"
@@ -136,36 +138,17 @@ export function IpadMockup({ children, type }: IpadMockupProps) {
                     {renderContent() || (
                       <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800">
                         <div className="text-center space-y-4 p-8">
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{
-                              delay: 0.6,
-                              type: "spring",
-                              stiffness: 200,
-                            }}
-                            className="w-20 h-20 mx-auto bg-linear-to-br from-[#006FB8] to-[#005A8C] rounded-2xl flex items-center justify-center shadow-lg"
-                          >
+                          <div className="w-20 h-20 mx-auto bg-linear-to-br from-[#006FB8] to-[#005A8C] rounded-2xl flex items-center justify-center shadow-lg">
                             <span className="text-3xl font-bold text-white">
                               N
                             </span>
-                          </motion.div>
-                          <motion.h2
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.8 }}
-                            className="text-2xl font-bold text-gray-900 dark:text-white"
-                          >
+                          </div>
+                          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                             Welcome to Nozzl
-                          </motion.h2>
-                          <motion.p
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 1 }}
-                            className="text-gray-600 dark:text-gray-400"
-                          >
+                          </h2>
+                          <p className="text-gray-600 dark:text-gray-400">
                             SPBU Management System
-                          </motion.p>
+                          </p>
                         </div>
                       </div>
                     )}
@@ -192,6 +175,6 @@ export function IpadMockup({ children, type }: IpadMockupProps) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

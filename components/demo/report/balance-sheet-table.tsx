@@ -24,11 +24,11 @@ function formatUTCDate(date: Date, formatStr: string): string {
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth();
   const day = date.getUTCDate();
-  
+
   // Create a new Date object in local timezone with UTC values
   // This ensures format() displays the correct date without timezone shift
   const localDate = new Date(year, month, day);
-  
+
   return format(localDate, formatStr, { locale: localeId });
 }
 
