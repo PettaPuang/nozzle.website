@@ -140,6 +140,34 @@ export function MockupHorizontal({
     }
   }, [clickedIndex]);
 
+  // Handle click outside untuk membatalkan hover/click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (clickedIndex === null) return;
+
+      // Cek apakah klik di dalam mockup yang sedang aktif
+      const clickedMockup = mockupRefs.current[clickedIndex];
+      const clickedIpad = ipadRefs.current[clickedIndex];
+
+      if (
+        clickedMockup &&
+        clickedIpad &&
+        !clickedMockup.contains(event.target as Node) &&
+        !clickedIpad.contains(event.target as Node)
+      ) {
+        setClickedIndex(null);
+      }
+    };
+
+    if (clickedIndex !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [clickedIndex]);
+
   // Fixed 8 mockups: welcome, station, chart, tank, welcome, station, chart, tank
   const mockupTypes: MockupType[] = [
     "welcome",
@@ -158,6 +186,7 @@ export function MockupHorizontal({
       className={`relative overflow-hidden ${containerClassName}`}
       style={{
         overflow: clickedIndex === null ? "hidden" : "visible",
+        background: "transparent",
       }}
     >
       {/* Track animasi mockup iPhone */}
@@ -185,7 +214,7 @@ export function MockupHorizontal({
               className="shrink-0 flex items-center justify-center cursor-pointer transition-transform"
               style={{
                 width: `${mockupWidth}px`,
-                height: "100%",
+                height: "70%",
                 transformOrigin: "center center",
                 zIndex: isClicked ? 50 : 1,
                 position: "relative",
@@ -194,7 +223,8 @@ export function MockupHorizontal({
                   : "none",
                 transition: "filter 0.4s ease",
               }}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 // Toggle: jika sudah diklik, reset. Jika belum, set clicked
                 setClickedIndex(isClicked ? null : index);
               }}
@@ -206,7 +236,7 @@ export function MockupHorizontal({
                   }}
                   className="relative block w-full"
                   style={{
-                    maxWidth: "min(1400px, 100%)",
+                    maxWidth: "min(1800px, 100%)",
                   }}
                 >
                   <IpadMockup type={type} />

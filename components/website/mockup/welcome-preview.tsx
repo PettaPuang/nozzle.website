@@ -85,8 +85,16 @@ export function WelcomeIphonePreview() {
           </div>
         </div>
 
-        {/* SPBU List */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+        {/* SPBU List - dengan scale untuk memperkecil */}
+        <div className="flex-1 overflow-hidden">
+          <div
+            className="h-full w-full origin-top-left overflow-y-auto px-3 py-2 space-y-2"
+            style={{
+              transform: "scale(0.85)",
+              width: "117.65%",
+              height: "117.65%",
+            }}
+          >
           {mockOwners.map((owner) => (
             <div key={owner.id} className="space-y-1">
               {/* Owner Group Header */}
@@ -155,6 +163,7 @@ export function WelcomeIphonePreview() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
 

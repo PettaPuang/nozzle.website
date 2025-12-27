@@ -29,8 +29,8 @@ export function NozzleCard({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.05 }}
       className={cn(
-        "rounded-lg border p-1 lg:p-2 flex flex-col items-center justify-center gap-1 lg:gap-2 bg-white",
-        isActive && "border-blue-500 bg-blue-50/50"
+        "rounded-lg border border-gray-200 dark:border-gray-700 p-1 lg:p-2 flex flex-col items-center justify-center gap-1 lg:gap-2 bg-white dark:bg-gray-800",
+        isActive && "border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/30"
       )}
     >
       {/* Nozzle Code Badge */}
@@ -49,7 +49,7 @@ export function NozzleCard({
 
       {/* Latest Reading */}
       {latestReading && (
-        <div className="text-[8px] lg:text-xs text-gray-600 text-center">
+        <div className="text-[8px] lg:text-xs text-gray-600 dark:text-gray-400 text-center">
           {latestReading.reading.toLocaleString("id-ID")} L
         </div>
       )}

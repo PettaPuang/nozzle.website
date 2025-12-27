@@ -144,18 +144,18 @@ export function StationCard({
 
   return (
     <>
-      <div className="rounded-lg border-2 p-1.5 lg:p-4 hover:shadow-sm hover:border-blue-500 hover:border-2px active:border-blue-500 active:border-2px transition-all bg-white">
+      <div className="rounded-lg border-2 border-gray-200 dark:border-gray-700 p-1.5 lg:p-4 hover:shadow-sm hover:border-blue-500 dark:hover:border-blue-400 hover:border-2px active:border-blue-500 dark:active:border-blue-400 active:border-2px transition-all bg-white dark:bg-gray-800">
         <div className="grid grid-cols-[20%_20%_60%] gap-1 lg:gap-2 items-stretch">
           {/* Section 1: Station Info - 20% */}
           <div className="space-y-1 lg:space-y-3 flex flex-col justify-between">
             <div>
-              <h3 className="font-semibold text-sm lg:text-base mb-0 lg:mb-1">
+              <h3 className="font-semibold text-sm lg:text-base mb-0 lg:mb-1 text-gray-900 dark:text-white">
                 {station.name}
               </h3>
               <Badge variant="secondary">{station.code}</Badge>
             </div>
             <div>
-              <div className="text-[10px] lg:text-xs font-medium text-gray-600 mb-0.5 lg:mb-2">
+              <div className="text-[10px] lg:text-xs font-medium text-gray-600 dark:text-gray-400 mb-0.5 lg:mb-2">
                 Connected Tanks:
               </div>
               <div className="flex flex-wrap gap-0.5 lg:gap-1">
@@ -171,10 +171,10 @@ export function StationCard({
           </div>
 
           {/* Section 2: Shift Status & Actions - 20% */}
-          <div className="flex flex-col justify-between border-l border-r px-1.5 lg:px-4">
+          <div className="flex flex-col justify-between border-l border-r border-gray-200 dark:border-gray-700 px-1.5 lg:px-4">
             {/* Shift Card */}
             <motion.div
-              className="rounded-lg border border-gray-200 p-1 lg:p-3 flex-1 bg-card overflow-hidden"
+              className="rounded-lg border border-gray-200 dark:border-gray-700 p-1 lg:p-3 flex-1 bg-card dark:bg-gray-900 overflow-hidden"
               animate={
                 shiftData
                   ? {
@@ -243,7 +243,7 @@ export function StationCard({
                         )}
                         {shiftData.startTime && (
                           <>
-                            <span className="text-[10px] text-gray-500 text-center whitespace-nowrap lg:hidden">
+                            <span className="text-[10px] text-gray-500 dark:text-gray-400 text-center whitespace-nowrap lg:hidden">
                               {new Date(shiftData.startTime).toLocaleTimeString(
                                 "id-ID",
                                 {
@@ -252,7 +252,7 @@ export function StationCard({
                                 }
                               )}
                             </span>
-                            <span className="hidden lg:block text-sm text-gray-500 text-center whitespace-nowrap">
+                            <span className="hidden lg:block text-sm text-gray-500 dark:text-gray-400 text-center whitespace-nowrap">
                               Check In:{" "}
                               {new Date(shiftData.startTime).toLocaleTimeString(
                                 "id-ID",
@@ -268,8 +268,8 @@ export function StationCard({
                     </div>
 
                     {/* Row 2 (25%): Nama */}
-                    <div className="h-[25%] pt-0.5 lg:pt-1 border-t border-gray-200 flex items-center">
-                      <p className="text-xs lg:text-base font-semibold text-gray-900 truncate w-full text-center">
+                    <div className="h-[25%] pt-0.5 lg:pt-1 border-t border-gray-200 dark:border-gray-700 flex items-center">
+                      <p className="text-xs lg:text-base font-semibold text-gray-900 dark:text-white truncate w-full text-center">
                         {shiftData.operator?.name}
                       </p>
                     </div>
@@ -298,7 +298,7 @@ export function StationCard({
                               />
                             )}
                             {shift.startTime && (
-                              <span className="hidden lg:inline text-[8px] lg:text-[10px] text-gray-500 whitespace-nowrap">
+                              <span className="hidden lg:inline text-[8px] lg:text-[10px] text-gray-500 dark:text-gray-400 whitespace-nowrap">
                                 {new Date(shift.startTime).toLocaleTimeString(
                                   "id-ID",
                                   {
@@ -320,7 +320,7 @@ export function StationCard({
                                 )}
                               </span>
                             )}
-                            <span className="text-[8px] lg:text-[10px] font-medium text-gray-900 truncate">
+                            <span className="text-[8px] lg:text-[10px] font-medium text-gray-900 dark:text-white truncate">
                               {shift.operator?.name}
                             </span>
                           </div>

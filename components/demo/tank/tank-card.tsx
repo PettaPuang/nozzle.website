@@ -55,13 +55,13 @@ export function TankCard({
   // Demo mode: no click handler
 
   return (
-    <div className="group bg-white rounded-lg border border-gray-300 p-1.5 lg:p-3 h-full flex flex-col">
+    <div className="group bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 p-1.5 lg:p-3 h-full flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between gap-1 lg:gap-2 mb-1.5 lg:mb-3 px-0.5 lg:px-1">
         {!hideName && (
           <span
             className={cn(
-              "font-semibold text-xs lg:text-sm",
+              "font-semibold text-xs lg:text-sm text-gray-900 dark:text-white",
               hideNameOnMobile ? "hidden lg:inline" : ""
             )}
           >
@@ -74,7 +74,7 @@ export function TankCard({
       {/* Tank Vertical - Expanded */}
       <div className="relative flex-1 min-h-[120px] lg:min-h-[150px] mb-1.5 lg:mb-3">
         {/* Tank Container - More Rounded */}
-        <div className="absolute inset-0 rounded-4xl border-2 border-gray-400 bg-gray-50 overflow-hidden">
+        <div className="absolute inset-0 rounded-4xl border-2 border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 overflow-hidden">
           {/* Liquid Fill - from bottom */}
           {fillPercentage > 0 && (
             <motion.div
@@ -181,6 +181,7 @@ export function TankCard({
                   className={cn(
                     "text-[10px] lg:text-xs mb-0.5",
                     "drop-shadow-[0_1px_4px_rgba(255,255,255,1),0_0_6px_rgba(255,255,255,0.8)]",
+                    "dark:drop-shadow-none",
                     productColor.text
                   )}
                 >
@@ -196,6 +197,7 @@ export function TankCard({
                 className={cn(
                   "text-sm lg:text-base font-extrabold",
                   "drop-shadow-[0_2px_6px_rgba(255,255,255,1),0_0_8px_rgba(255,255,255,0.8)]",
+                  "dark:drop-shadow-none",
                   fillPercentage > 0 ? productColor.text : "text-gray-400"
                 )}
               >

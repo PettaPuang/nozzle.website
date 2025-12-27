@@ -11,9 +11,9 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   // Landing page untuk website perkenalan Nozzl
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden">
+    <div className="min-h-screen flex flex-col overflow-x-hidden w-full">
       <WebsiteHeader />
-      <main className="flex-1 overflow-x-hidden">
+      <main className="flex-1 overflow-x-hidden w-full">
         <HeroSatu />
         <FeaturesSection />
         <BenefitsSection />

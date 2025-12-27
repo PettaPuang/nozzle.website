@@ -59,7 +59,7 @@ export function WelcomeIpadPreview() {
   return (
     <div className="h-full w-full bg-white dark:bg-gray-900 overflow-hidden flex">
       {/* Left Sidebar */}
-      <div className="w-[35%] border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
+      <div className="w-[40%] border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
           <h1 className="text-lg font-normal">
@@ -85,8 +85,16 @@ export function WelcomeIpadPreview() {
           </div>
         </div>
 
-        {/* SPBU List */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        {/* SPBU List - dengan scale untuk memperkecil */}
+        <div className="flex-1 overflow-hidden">
+          <div
+            className="h-full w-full origin-top-left overflow-y-auto px-6 py-4 space-y-4"
+            style={{
+              transform: "scale(0.8)",
+              width: "125%",
+              height: "125%",
+            }}
+          >
           {mockOwners.map((owner) => (
             <div key={owner.id} className="space-y-2">
               {/* Owner Group Header */}
@@ -155,11 +163,12 @@ export function WelcomeIpadPreview() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
 
       {/* Right Panel - Map */}
-      <div className="w-[65%] overflow-hidden">
+      <div className="w-[60%] overflow-hidden">
         <div className="h-full w-full">
           <SpbuMap spbus={mockSpbus} />
         </div>

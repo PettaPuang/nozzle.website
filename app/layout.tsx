@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 // Plus Jakarta Sans - ExtraLight (200) sebagai default
@@ -50,6 +51,28 @@ const plusJakartaSans = localFont({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Inter untuk hero dan display text (menggunakan Inter sebagai display font)
+const interDisplay = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter-display",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+// Boldonse untuk hero heading
+const boldonse = localFont({
+  src: [
+    {
+      path: "../public/fonts/Boldonse-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-boldonse",
+  display: "swap",
+  fallback: ["var(--font-inter-display)", "sans-serif"],
 });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -149,12 +172,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning className="w-full">
       <body
-        className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased font-sans font-extralight overflow-x-hidden`}
+        className={`${plusJakartaSans.variable} ${geistMono.variable} ${interDisplay.variable} ${boldonse.variable} antialiased font-sans font-extralight overflow-x-hidden w-full`}
       >
-        {children}
-        <Toaster richColors />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+          <Toaster richColors />
+        </ThemeProvider>
       </body>
     </html>
   );
