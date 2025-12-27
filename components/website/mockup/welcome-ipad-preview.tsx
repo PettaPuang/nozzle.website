@@ -65,9 +65,7 @@ export function WelcomeIpadPreview() {
           <h1 className="text-lg font-normal">
             Welcome{" "}
             <span className="font-bold">{firstOwner?.name || "ownerdemo"}</span>
-            <span className="text-sm text-gray-500">
-              , you are an Owner
-            </span>
+            <span className="text-sm text-gray-500">, you are an Owner</span>
           </h1>
           <div className="mt-3">
             <PertaminaStripes />
@@ -95,74 +93,76 @@ export function WelcomeIpadPreview() {
               height: "125%",
             }}
           >
-          {mockOwners.map((owner) => (
-            <div key={owner.id} className="space-y-2">
-              {/* Owner Group Header */}
-              <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                <ChevronDown className="h-5 w-5 text-gray-600" />
-                <Image
-                  src="/logo/NozzlLogomark.svg"
-                  alt="Nozzl"
-                  width={24}
-                  height={24}
-                  className="h-6 w-6"
-                />
-                <h2 className="text-base font-semibold text-gray-700 dark:text-gray-300">
-                  {owner.name}
-                </h2>
-                <span className="text-sm text-gray-500">
-                  ({owner.spbuCount} SPBU)
-                </span>
-              </div>
+            {mockOwners.map((owner) => (
+              <div key={owner.id} className="space-y-2">
+                {/* Owner Group Header */}
+                <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <ChevronDown className="h-5 w-5 text-gray-600" />
+                  <Image
+                    src="/logo/NozzlLogomark.svg"
+                    alt="Nozzl"
+                    width={24}
+                    height={24}
+                    className="h-6 w-6"
+                  />
+                  <h2 className="text-base font-semibold text-gray-700 dark:text-gray-300">
+                    {owner.name}
+                  </h2>
+                  <span className="text-sm text-gray-500">
+                    ({owner.spbuCount} SPBU)
+                  </span>
+                </div>
 
-              {/* SPBU Cards */}
-              <div className="pl-3 space-y-2">
-                {mockSpbus
-                  .filter((spbu) => spbu.ownerId === owner.id)
-                  .map((spbu) => (
-                    <div
-                      key={spbu.id}
-                      className="border-b border-gray-200 dark:border-gray-700 px-3 py-3"
-                    >
-                      <div className="flex items-start gap-3">
-                        <Image
-                          src="/picture/pertaminalogo.png"
-                          alt="Pertamina"
-                          width={24}
-                          height={24}
-                          className="h-6 w-6 shrink-0 mt-1"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
-                            {spbu.name}
-                          </h3>
-                          <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 mt-2">
-                            <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                            <span className="line-clamp-2">{spbu.address}</span>
-                          </div>
-                          <div className="flex items-center gap-3 mt-3 flex-wrap">
-                            {spbu.openTime && spbu.closeTime && (
-                              <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
-                                <Clock className="h-4 w-4 shrink-0" />
-                                <span>
-                                  {spbu.openTime} - {spbu.closeTime}
-                                </span>
-                              </div>
-                            )}
-                            <Badge
-                              variant="default"
-                              className="shrink-0 text-sm px-3 py-1 h-7"
-                            >
-                              {spbu.status}
-                            </Badge>
+                {/* SPBU Cards */}
+                <div className="pl-3 space-y-2">
+                  {mockSpbus
+                    .filter((spbu) => spbu.ownerId === owner.id)
+                    .map((spbu) => (
+                      <div
+                        key={spbu.id}
+                        className="border-b border-gray-200 dark:border-gray-700 px-3 py-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <Image
+                            src="/picture/pertaminalogo.png"
+                            alt="Pertamina"
+                            width={24}
+                            height={24}
+                            className="h-6 w-6 shrink-0 mt-1"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                              {spbu.name}
+                            </h3>
+                            <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 mt-2">
+                              <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                              <span className="line-clamp-2">
+                                {spbu.address}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 mt-3 flex-wrap">
+                              {spbu.openTime && spbu.closeTime && (
+                                <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                                  <Clock className="h-4 w-4 shrink-0" />
+                                  <span>
+                                    {spbu.openTime} - {spbu.closeTime}
+                                  </span>
+                                </div>
+                              )}
+                              <Badge
+                                variant="default"
+                                className="shrink-0 text-sm px-3 py-1 h-7"
+                              >
+                                {spbu.status}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         </div>
       </div>
@@ -176,4 +176,3 @@ export function WelcomeIpadPreview() {
     </div>
   );
 }
-

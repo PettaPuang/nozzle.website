@@ -1,6 +1,7 @@
 import { WebsiteHeader } from "@/components/website/header";
 import { WebsiteFooter } from "@/components/website/footer";
 import HeroSatu from "@/components/website/herosatu";
+import { HoldingIpadSection } from "@/components/website/holding-ipad-section";
 import { FeaturesSection } from "@/components/website/features-section";
 import { BenefitsSection } from "@/components/website/benefits-section";
 import { HowItWorksSection } from "@/components/website/how-it-works-section";
@@ -15,6 +16,7 @@ export default async function Home() {
       <WebsiteHeader />
       <main className="flex-1 overflow-x-hidden w-full">
         <HeroSatu />
+        <HoldingIpadSection />
         <FeaturesSection />
         <BenefitsSection />
         <HowItWorksSection />
